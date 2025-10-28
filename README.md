@@ -1,1 +1,1 @@
-# Proyecto2---rbol-Geneal-gico
+# Proyecto2-Algoritmos y Estructuras de Datos I
