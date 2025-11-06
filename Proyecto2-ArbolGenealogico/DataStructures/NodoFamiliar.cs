@@ -12,7 +12,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public string FotoRuta;
         public double Latitud;
         public double Longitud;
-        public NodoFamiliar? Padre;
+        public NodoFamiliar Padre;
         public ListaEnlazada<NodoFamiliar> Hijos;
 
         public NodoFamiliar(string nombre, string cedula, string fechaNacimiento, int edad, string fotoRuta, double latitud, double longitud)

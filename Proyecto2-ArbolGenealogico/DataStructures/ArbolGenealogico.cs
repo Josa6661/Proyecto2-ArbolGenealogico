@@ -4,8 +4,8 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
 {
     public class ArbolGenealogico
     {
-        // Nodo raíz del árbol
-        public NodoFamiliar? Raiz;
+        // Propiedad de solo lectura (encapsulada)
+        public NodoFamiliar Raiz { get; private set; }
 
         // Constructor
         public ArbolGenealogico()
@@ -19,27 +19,28 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             Raiz = miembro;
         }
 
-        // Busca a un familiar por nombre en todo el árbol
-        public NodoFamiliar? BuscarPorNombre(string nombre)
+        // Busca un familiar por nombre en todo el árbol
+        public NodoFamiliar BuscarPorNombre(string nombre)
         {
             return BuscarPorNombreRecursivo(Raiz, nombre);
         }
 
-        // Implementación recursiva de búsqueda por nombre
-        private NodoFamiliar? BuscarPorNombreRecursivo(NodoFamiliar? actual, string nombre)
+        // Implementación recursiva de búsqueda
+        private NodoFamiliar BuscarPorNombreRecursivo(NodoFamiliar actual, string nombre)
         {
             if (actual == null)
                 return null;
+
             if (actual.Nombre == nombre)
                 return actual;
 
-            // Recorre toda la rama de hijos
             for (int i = 0; i < actual.Hijos.Largo(); i++)
             {
                 var encontrado = BuscarPorNombreRecursivo(actual.Hijos.Obtener(i), nombre);
                 if (encontrado != null)
                     return encontrado;
             }
+
             return null;
         }
 
@@ -50,46 +51,73 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             if (padre != null)
             {
                 padre.AgregarHijo(hijo);
+                hijo.Padre = padre;
                 return true;
             }
             return false;
         }
 
-        // Elimina a un miembro por nombre (y su sub-árbol), actualiza el padre para quitarlo de la lista de hijos
+        // Elimina un miembro por nombre (y su sub-árbol)
         public bool EliminarMiembro(string nombre)
         {
-            // Si la raíz es el que debe ser eliminado, borra todo el árbol
+            // Si la raíz es el nodo a eliminar, borra todo el árbol
             if (Raiz != null && Raiz.Nombre == nombre)
             {
                 Raiz = null;
                 return true;
             }
-            // Busca y elimina en subárboles
+
+            // Busca en subárboles
             return EliminarRecursivo(Raiz, nombre);
         }
 
-        // Recorrida recursiva para encontrar y eliminar el nodo deseado
-        private bool EliminarRecursivo(NodoFamiliar? actual, string nombre)
+        private bool EliminarRecursivo(NodoFamiliar actual, string nombre)
         {
             if (actual == null)
                 return false;
+
             for (int i = 0; i < actual.Hijos.Largo(); i++)
             {
-                if (actual.Hijos.Obtener(i).Nombre == nombre)
+                var hijo = actual.Hijos.Obtener(i);
+
+                if (hijo.Nombre == nombre)
                 {
                     actual.Hijos.EliminarPorIndice(i);
                     return true;
                 }
-                if (EliminarRecursivo(actual.Hijos.Obtener(i), nombre))
+
+                if (EliminarRecursivo(hijo, nombre))
                     return true;
             }
+
             return false;
         }
 
-        // Vacía completamente el árbol genealógico
+        // Limpia completamente el árbol
         public void Limpiar()
         {
             Raiz = null;
+        }
+
+        // Retorna todos los nodos del árbol (para visualización o guardado)
+        public List<NodoFamiliar> ObtenerTodos()
+        {
+            var lista = new List<NodoFamiliar>();
+            ObtenerTodosRecursivo(Raiz, lista);
+            return lista;
+        }
+
+        private void ObtenerTodosRecursivo(NodoFamiliar actual, List<NodoFamiliar> lista)
+        {
+            if (actual == null)
+                return;
+
+            lista.Add(actual);
+
+            for (int i = 0; i < actual.Hijos.Largo(); i++)
+            {
+                ObtenerTodosRecursivo(actual.Hijos.Obtener(i), lista);
+            }
         }
     }
 }

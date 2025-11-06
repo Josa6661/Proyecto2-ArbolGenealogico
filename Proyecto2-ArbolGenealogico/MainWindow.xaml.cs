@@ -23,6 +23,8 @@ namespace Proyecto2_ArbolGenealogico
             TestCola.ProbarCola();
             TestArray.ProbarArray();
             TestArbolGenealogico.ProbarArbol();
+            TestArbolService.ProbarService();
+            TestArbolController.ProbarController();
         }
     }
 }
