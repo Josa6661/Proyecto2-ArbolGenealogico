@@ -2,16 +2,16 @@
 {
     public class GrafoGeografico
     {
-        private Dictionary<string, NodoGrafo> nodos; // cedula -> nodo
-        private Dictionary<string, Dictionary<string, double>> distancias; // matriz de adyacencia
+        private readonly Dictionary<string, NodoGrafo>  nodos; // cedula -> nodo
+        private readonly Dictionary<string, Dictionary<string, double>> distancias; // matriz de adyacencia
 
         public class NodoGrafo
         {
-            public string Cedula;
-            public string Nombre;
-            public double Latitud;
-            public double Longitud;
-            public string FotoRuta;
+            public string Cedula { get; set;}
+            public string Nombre { get; set; }
+            public double Latitud { get; set; }
+            public double Longitud { get; set; }
+            public string FotoRuta { get; set; }
 
             public NodoGrafo(string cedula, string nombre, double lat, double lon, string foto)
             {
@@ -59,7 +59,7 @@
         }
 
         // Fórmula de Haversine para distancia geográfica
-        private double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
+        private static double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
         {
             const double R = 6371; // Radio de la Tierra en km
 
@@ -74,7 +74,7 @@
             return R * c;
         }
 
-        private double ToRadianes(double grados)
+        private static double ToRadianes(double grados)
         {
             return grados * Math.PI / 180;
         }

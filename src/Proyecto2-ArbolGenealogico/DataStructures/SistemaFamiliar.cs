@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-
 namespace Proyecto2_ArbolGenealogico.DataStructures
 {
     public class SistemaFamiliar
@@ -13,10 +12,8 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             Grafo = new GrafoGeografico();
         }
 
-        // Agrega miembro a AMBAS estructuras
         public bool AgregarMiembroCompleto(string nombrePadre, NodoFamiliar familiar)
         {
-            // Si es la raíz
             if (!Arbol.TieneRaiz())
             {
                 Arbol.CrearRaiz(familiar);
@@ -27,7 +24,6 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
                     return false;
             }
 
-            // Agregar al grafo
             var nodoGrafo = new GrafoGeografico.NodoGrafo(
                 familiar.Cedula,
                 familiar.Nombre,
@@ -36,27 +32,28 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
                 familiar.FotoRuta
             );
             Grafo.AgregarNodo(nodoGrafo);
-
-            // Recalcular distancias
             Grafo.RecalcularTodasDistancias();
-
             return true;
         }
 
-        // Búsqueda unificada
         public NodoFamiliar BuscarPorNombre(string nombre)
         {
             return Arbol.BuscarPorNombre(nombre);
         }
 
-        // Obtener estadísticas del grafo
+        // ✅ ARREGLADO: Maneja casos vacíos
         public (string nombre1, string nombre2, double distancia) ParMasLejano()
         {
             var (ced1, ced2, dist) = Grafo.ObtenerParMasLejano();
-            var nodo1 = Arbol.BuscarPorNombre(Grafo.ObtenerTodosNodos()
-                .First(n => n.Cedula == ced1).Nombre);
-            var nodo2 = Arbol.BuscarPorNombre(Grafo.ObtenerTodosNodos()
-                .First(n => n.Cedula == ced2).Nombre);
+
+            // Validar que tengamos cédulas válidas
+            if (string.IsNullOrEmpty(ced1) || string.IsNullOrEmpty(ced2))
+                return ("", "", 0);
+
+            // Buscar nodos en el grafo usando FirstOrDefault para evitar excepciones
+            var nodo1 = Grafo.ObtenerTodosNodos().FirstOrDefault(n => n.Cedula == ced1);
+            var nodo2 = Grafo.ObtenerTodosNodos().FirstOrDefault(n => n.Cedula == ced2);
+
             return (nodo1?.Nombre ?? "", nodo2?.Nombre ?? "", dist);
         }
 

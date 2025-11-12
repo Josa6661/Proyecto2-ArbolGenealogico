@@ -5,15 +5,15 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
     // Nodo para el árbol genealógico
     public class NodoFamiliar
     {
-        public string Nombre;
-        public string Cedula;
-        public string FechaNacimiento;
-        public int Edad;
-        public string FotoRuta;
-        public double Latitud;
-        public double Longitud;
-        public NodoFamiliar Padre;
-        public ListaEnlazada<NodoFamiliar> Hijos;
+        public string Nombre { get; set; }
+        public string Cedula { get; set; }
+        public string FechaNacimiento { get; set; }
+        public int Edad { get; set; }
+        public string FotoRuta { get; set; }
+        public double Latitud { get; set; }
+        public double Longitud { get; set; }
+        public NodoFamiliar Padre { get; set; }
+        public ListaEnlazada<NodoFamiliar> Hijos { get; set; }
 
         public NodoFamiliar(string nombre, string cedula, string fechaNacimiento, int edad, string fotoRuta, double latitud, double longitud)
         {
