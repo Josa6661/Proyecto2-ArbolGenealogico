@@ -47,7 +47,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         }
 
         // Elimina elemento por índice y recorre los siguientes
-        public void Eliminar(int indice)
+        public void EliminarPorIndice(int indice)
         {
             if (indice < 0 || indice >= cantidad)
                 throw new ArgumentOutOfRangeException("Índice fuera de rango.");

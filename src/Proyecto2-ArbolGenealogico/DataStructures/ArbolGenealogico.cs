@@ -4,28 +4,28 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
 {
     public class ArbolGenealogico
     {
-        // Propiedad de solo lectura (encapsulada)
         public NodoFamiliar Raiz { get; private set; }
 
-        // Constructor
         public ArbolGenealogico()
         {
             Raiz = null;
         }
 
-        // Define el primer nodo/familiar como raíz
         public void CrearRaiz(NodoFamiliar miembro)
         {
             Raiz = miembro;
         }
 
-        // Busca un familiar por nombre en todo el árbol
+        public bool TieneRaiz()
+        {
+            return Raiz != null;
+        }
+
         public NodoFamiliar BuscarPorNombre(string nombre)
         {
             return BuscarPorNombreRecursivo(Raiz, nombre);
         }
 
-        // Implementación recursiva de búsqueda
         private NodoFamiliar BuscarPorNombreRecursivo(NodoFamiliar actual, string nombre)
         {
             if (actual == null)
@@ -44,30 +44,29 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             return null;
         }
 
-        // Agrega un hijo a un miembro existente (busca el padre por nombre)
         public bool AgregarMiembro(string nombrePadre, NodoFamiliar hijo)
         {
+            // Validación de raíz
+            if (Raiz == null)
+                return false;
+
             var padre = BuscarPorNombre(nombrePadre);
             if (padre != null)
             {
                 padre.AgregarHijo(hijo);
-                hijo.Padre = padre;
                 return true;
             }
             return false;
         }
 
-        // Elimina un miembro por nombre (y su sub-árbol)
         public bool EliminarMiembro(string nombre)
         {
-            // Si la raíz es el nodo a eliminar, borra todo el árbol
             if (Raiz != null && Raiz.Nombre == nombre)
             {
                 Raiz = null;
                 return true;
             }
 
-            // Busca en subárboles
             return EliminarRecursivo(Raiz, nombre);
         }
 
@@ -93,13 +92,11 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             return false;
         }
 
-        // Limpia completamente el árbol
         public void Limpiar()
         {
             Raiz = null;
         }
 
-        // Retorna todos los nodos del árbol (para visualización o guardado)
         public List<NodoFamiliar> ObtenerTodos()
         {
             var lista = new List<NodoFamiliar>();
