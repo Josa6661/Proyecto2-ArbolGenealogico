@@ -1,4 +1,5 @@
 ﻿using Proyecto2_ArbolGenealogico.DataStructures;
+using System;
 using System.Diagnostics;
 
 namespace Proyecto2_ArbolGenealogico.Tests
@@ -7,23 +8,23 @@ namespace Proyecto2_ArbolGenealogico.Tests
     {
         public static void ProbarArray()
         {
-            Debug.WriteLine("=== INICIO TEST ARRAY ===");
+            Console.WriteLine("=== INICIO TEST ARRAY ===");
 
             var arr = new Array<int>();
             arr.Agregar(1);
             arr.Agregar(2);
             arr.Agregar(3);
 
-            Debug.WriteLine("Largo tras agregar: " + arr.Largo());
-            Debug.WriteLine("Elemento en 1: " + arr.Obtener(1));
+            Console.WriteLine("Largo tras agregar: " + arr.Largo());
+            Console.WriteLine("Elemento en 1: " + arr.Obtener(1));
 
             arr.Eliminar(1); // 
-            Debug.WriteLine("Largo tras eliminar posición 1: " + arr.Largo());
+            Console.WriteLine("Largo tras eliminar posición 1: " + arr.Largo());
 
             arr.Limpiar();
-            Debug.WriteLine("Largo tras limpiar: " + arr.Largo());
+            Console.WriteLine("Largo tras limpiar: " + arr.Largo());
 
-            Debug.WriteLine("=== FIN TEST ARRAY ===");
+            Console.WriteLine("=== FIN TEST ARRAY ===");
         }
     }
 }

@@ -1,5 +1,6 @@
 using Proyecto2_ArbolGenealogico.Controllers;
 using Proyecto2_ArbolGenealogico.DataStructures;
+using System;
 using System.Diagnostics;
 
 namespace Proyecto2_ArbolGenealogico.Tests
@@ -8,7 +9,7 @@ namespace Proyecto2_ArbolGenealogico.Tests
     {
         public static void ProbarController()
         {
-            Debug.WriteLine("=== INICIO TEST ARBOL CONTROLLER ===");
+            Console.WriteLine("=== INICIO TEST ARBOL CONTROLLER ===");
 
             var controller = new ArbolController();
 
@@ -24,25 +25,25 @@ namespace Proyecto2_ArbolGenealogico.Tests
             var hijo = controller.BuscarMiembro("Hijo");
             var inexistente = controller.BuscarMiembro("Primo");
 
-            Debug.WriteLine($"¿Padre encontrado?: {padre != null}");
-            Debug.WriteLine($"¿Hijo encontrado?: {hijo != null}");
-            Debug.WriteLine($"¿Primo encontrado?: {inexistente != null}");
+            Console.WriteLine($"¿Padre encontrado?: {padre != null}");
+            Console.WriteLine($"¿Hijo encontrado?: {hijo != null}");
+            Console.WriteLine($"¿Primo encontrado?: {inexistente != null}");
 
             // Obtener todos los miembros
             var todos = controller.ObtenerTodos();
-            Debug.WriteLine($"Cantidad total de miembros: {todos.Count}");
+            Console.WriteLine($"Cantidad total de miembros: {todos.Count}");
 
             // Eliminar un miembro
             controller.EliminarMiembro("Hijo");
             var despuesEliminar = controller.BuscarMiembro("Hijo");
-            Debug.WriteLine($"¿Hijo sigue existiendo?: {despuesEliminar != null}");
+            Console.WriteLine($"¿Hijo sigue existiendo?: {despuesEliminar != null}");
 
             // Limpiar árbol
             controller.Limpiar();
             var despuesLimpiar = controller.BuscarMiembro("Abuelo");
-            Debug.WriteLine($"¿Existe raíz tras limpiar?: {despuesLimpiar != null}");
+            Console.WriteLine($"¿Existe raíz tras limpiar?: {despuesLimpiar != null}");
 
-            Debug.WriteLine("=== FIN TEST ARBOL CONTROLLER ===");
+            Console.WriteLine("=== FIN TEST ARBOL CONTROLLER ===");
         }
     }
 }

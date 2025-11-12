@@ -1,8 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+<<<<<<< HEAD
     <OutputType>WinExe</OutputType>
 	<TargetFramework>net8.0-windows</TargetFramework>
+=======
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+>>>>>>> 79d49f636026a549b20297176eb8f4a0d41169d1
     <RootNamespace>Proyecto2_ArbolGenealogico</RootNamespace>
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

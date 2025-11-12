@@ -1,4 +1,5 @@
 ﻿using Proyecto2_ArbolGenealogico.DataStructures;
+using System;
 using System.Diagnostics;
 
 namespace Proyecto2_ArbolGenealogico.Tests
@@ -7,7 +8,7 @@ namespace Proyecto2_ArbolGenealogico.Tests
     {
         public static void ProbarPila()
         {
-            Debug.WriteLine("=== INICIO TEST PILA ===");
+            Console.WriteLine("=== INICIO TEST PILA ===");
 
             var pila = new Pila<int>();
 
@@ -15,18 +16,18 @@ namespace Proyecto2_ArbolGenealogico.Tests
             pila.Apilar(20);
             pila.Apilar(30);
 
-            Debug.WriteLine("Largo: " + pila.Largo());
-            Debug.WriteLine("Tope antes de desapilar: " + pila.VerTope()); 
+            Console.WriteLine("Largo: " + pila.Largo());
+            Console.WriteLine("Tope antes de desapilar: " + pila.VerTope()); 
 
-            Debug.WriteLine("Desapilar: " + pila.Desapilar());
-            Debug.WriteLine("Tope tras desapilar: " + pila.VerTope());
+            Console.WriteLine("Desapilar: " + pila.Desapilar());
+            Console.WriteLine("Tope tras desapilar: " + pila.VerTope());
 
-            Debug.WriteLine("¿Está vacía?: " + pila.EstaVacia());
+            Console.WriteLine("¿Está vacía?: " + pila.EstaVacia());
 
             pila.Limpiar();
-            Debug.WriteLine("¿Vacía tras limpiar?: " + pila.EstaVacia());
+            Console.WriteLine("¿Vacía tras limpiar?: " + pila.EstaVacia());
 
-            Debug.WriteLine("=== FIN TEST PILA ===");
+            Console.WriteLine("=== FIN TEST PILA ===");
         }
     }
 }
