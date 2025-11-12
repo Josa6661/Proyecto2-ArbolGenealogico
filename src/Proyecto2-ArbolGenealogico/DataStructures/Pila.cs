@@ -7,7 +7,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         private NodoPila<T> tope;
         private int cantidad;
 
-        private class NodoPila<TNodo>
+        private sealed class NodoPila<TNodo>
         {
             public TNodo Valor;
             public NodoPila<TNodo> Siguiente;

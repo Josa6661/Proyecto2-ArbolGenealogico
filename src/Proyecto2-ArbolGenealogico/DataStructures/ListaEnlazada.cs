@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace Proyecto2_ArbolGenealogico.DataStructures
+﻿namespace Proyecto2_ArbolGenealogico.DataStructures
 {
     public class NodoLista<T>
     {
-        public T Valor;
-        public NodoLista<T> Siguiente;
+        public T Valor { get; set; }
+        public NodoLista<T> Siguiente { get; set; }
 
         public NodoLista(T valor)
         {
@@ -74,7 +72,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public void EliminarPorIndice(int indice)
         {
             if (indice < 0 || indice >= cantidad)
-                throw new ArgumentOutOfRangeException("Índice fuera de rango.");
+                throw new ArgumentOutOfRangeException(nameof(indice), "Índice fuera de rango.");
             NodoLista<T> previo = null;
             NodoLista<T> actual = cabeza;
             for (int i = 0; i < indice; i++)
@@ -115,7 +113,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public T Obtener(int indice)
         {
             if (indice < 0 || indice >= cantidad)
-                throw new ArgumentOutOfRangeException("Índice fuera de rango.");
+                throw new ArgumentOutOfRangeException(nameof(indice), "Índice fuera de rango.");
             NodoLista<T> actual = cabeza;
             for (int i = 0; i < indice; i++)
                 actual = actual.Siguiente;

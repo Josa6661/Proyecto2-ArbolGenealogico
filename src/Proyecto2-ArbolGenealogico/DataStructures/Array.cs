@@ -16,6 +16,9 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             cantidad = 0;
         }
 
+        // Verifica si está vacío
+        public bool EstaVacio() => cantidad == 0;
+
         // Devuelve cantidad de elementos
         public int Largo() => cantidad;
 
@@ -32,7 +35,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public T Obtener(int indice)
         {
             if (indice < 0 || indice >= cantidad)
-                throw new ArgumentOutOfRangeException("Índice fuera de rango.");
+                throw new ArgumentOutOfRangeException(nameof(indice), "Índice fuera de rango.");
             return elementos[indice];
         }
 
@@ -50,7 +53,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public void EliminarPorIndice(int indice)
         {
             if (indice < 0 || indice >= cantidad)
-                throw new ArgumentOutOfRangeException("Índice fuera de rango.");
+                throw new ArgumentOutOfRangeException(nameof(indice), "Índice fuera de rango.");
             for (int i = indice; i < cantidad - 1; i++)
                 elementos[i] = elementos[i + 1];
             cantidad--;
