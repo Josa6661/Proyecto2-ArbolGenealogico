@@ -17,14 +17,6 @@ namespace Proyecto2_ArbolGenealogico
         public MainWindow()
         {
             InitializeComponent();
-            // Ejecuta todas las pruebas
-            TestListaEnlazada.ProbarLista();
-            TestPila.ProbarPila();
-            TestCola.ProbarCola();
-            TestArray.ProbarArray();
-            TestArbolGenealogico.ProbarArbol();
-            TestArbolService.ProbarService();
-            TestArbolController.ProbarController();
         }
     }
 }
