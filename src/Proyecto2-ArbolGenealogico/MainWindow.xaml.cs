@@ -19,7 +19,7 @@
 //        }
 //    }
 //}
-
+using Proyecto2_ArbolGenealogico.DataStructures;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -29,65 +29,160 @@ namespace Proyecto2_ArbolGenealogico
 {
     public partial class MainWindow : Window
     {
-        private double posX = 50; // posición inicial X para el primer nodo
-        private double posY = 50; // posición inicial Y
-        private double separacionVertical = 120; // distancia entre nodos
-        private double separacionHorizontal = 120;
+        private SistemaFamiliar sistema;
+        private double nodoAncho = 80;
+        private double nodoAlto = 80;
+        private double espacioHorizontal = 60;
+        private double espacioVertical = 120;
 
         public MainWindow()
         {
             InitializeComponent();
+            sistema = new SistemaFamiliar();
         }
 
+        // BOTÓN AGREGAR
         private void Agregar_Click(object sender, RoutedEventArgs e)
         {
-            string nombre = txtNombre.Text;
-            string apellido = txtApellido.Text;
+            string nombre = txtNombre.Text.Trim();
+            string apellido = txtApellido.Text.Trim();
+            string padreNombre = txtPadre.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(apellido))
+            if (string.IsNullOrWhiteSpace(nombre))
             {
-                MessageBox.Show("Por favor, ingresa el nombre y apellido del familiar.", "Atención", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Por favor, ingresa un nombre.");
                 return;
             }
 
-            // Crear el nodo visual (círculo)
+            // Crear el nuevo nodo familiar
+            NodoFamiliar nuevo = new NodoFamiliar(
+                nombre,
+                "CédulaGenérica",
+                "01/01/2000",
+                25,
+                "",
+                0, 0
+            );
+
+            if (!sistema.Arbol.TieneRaiz())
+            {
+                sistema.Arbol.CrearRaiz(nuevo);
+                MessageBox.Show($"'{nombre}' ha sido creado como raíz del árbol.");
+            }
+            else
+            {
+                bool agregado = false;
+
+                if (!string.IsNullOrWhiteSpace(padreNombre))
+                {
+                    agregado = sistema.Arbol.AgregarMiembro(padreNombre, nuevo);
+                }
+
+                if (!agregado)
+                {
+                    MessageBox.Show($"No se encontró el padre '{padreNombre}'. Se agregó como hijo de la raíz.");
+                    sistema.Arbol.Raiz.AgregarHijo(nuevo);
+                }
+            }
+
+            DibujarArbol();
+            LimpiarCampos();
+        }
+        private void LimpiarCampos()
+        {
+            txtNombre.Clear();
+            txtApellido.Clear();
+            txtCiudad.Clear();
+            txtPais.Clear();
+            txtPadre.Clear();
+        }
+
+        // 🔹 Dibuja el árbol completo en el Canvas
+        private void DibujarArbol()
+        {
+            ArbolCanvas.Children.Clear();
+
+            if (!sistema.Arbol.TieneRaiz())
+                return;
+
+            double startX = 400; // centro del canvas
+            double startY = 40;
+            DibujarNodo(sistema.Arbol.Raiz, startX, startY);
+        }
+
+        private double DibujarNodo(NodoFamiliar persona, double x, double y)
+        {
+            // Dibuja el nodo
             Ellipse nodo = new Ellipse
             {
-                Width = 80,
-                Height = 80,
-                Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)), // #64B5F6
+                Width = nodoAncho,
+                Height = nodoAlto,
+                Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)),
                 StrokeThickness = 2
             };
-
-            // Crear el texto (nombre del familiar)
             TextBlock texto = new TextBlock
             {
-                Text = $"{nombre} {apellido}",
+                Text = persona.Nombre,
                 Foreground = Brushes.White,
                 FontSize = 14,
                 TextAlignment = TextAlignment.Center
             };
 
-            // Posicionar el nodo en el Canvas
-            Canvas.SetLeft(nodo, posX);
-            Canvas.SetTop(nodo, posY);
+            Canvas.SetLeft(nodo, x - nodoAncho / 2);
+            Canvas.SetTop(nodo, y);
+            Canvas.SetLeft(texto, x - nodoAncho / 2 + 10);
+            Canvas.SetTop(texto, y + nodoAlto / 2 - 10);
 
-            // Centrar el texto dentro del nodo
-            Canvas.SetLeft(texto, posX + 10);
-            Canvas.SetTop(texto, posY + 30);
-
-            // Agregar al Canvas
             ArbolCanvas.Children.Add(nodo);
             ArbolCanvas.Children.Add(texto);
 
-            // Ajustar posición para el siguiente nodo
-            posX += separacionHorizontal;
+            if (persona.Hijos.Largo() == 0)
+                return nodoAncho;
 
-            // Limpiar los campos
-            txtNombre.Clear();
-            txtApellido.Clear();
-            txtCiudad.Clear();
-            txtPais.Clear();
+            // Calcular ancho total de los hijos
+            double totalAncho = 0;
+            for (int i = 0; i < persona.Hijos.Largo(); i++)
+                totalAncho += CalcularAncho(persona.Hijos.Obtener(i));
+
+            double xInicio = x - totalAncho / 2;
+
+            for (int i = 0; i < persona.Hijos.Largo(); i++)
+            {
+                var hijo = persona.Hijos.Obtener(i);
+                double anchoHijo = CalcularAncho(hijo);
+                double xHijo = xInicio + anchoHijo / 2;
+
+                // Línea de conexión
+                Line linea = new Line
+                {
+                    X1 = x,
+                    Y1 = y + nodoAlto,
+                    X2 = xHijo,
+                    Y2 = y + nodoAlto + espacioVertical - 40,
+                    Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)),
+                    StrokeThickness = 2
+                };
+                ArbolCanvas.Children.Add(linea);
+
+                // Dibuja hijo recursivamente
+                DibujarNodo(hijo, xHijo, y + espacioVertical);
+                xInicio += anchoHijo;
+            }
+
+            return totalAncho;
+        }
+
+        private double CalcularAncho(NodoFamiliar persona)
+        {
+            if (persona.Hijos.Largo() == 0)
+                return nodoAncho + espacioHorizontal;
+
+            double ancho = 0;
+            for (int i = 0; i < persona.Hijos.Largo(); i++)
+                ancho += CalcularAncho(persona.Hijos.Obtener(i));
+
+            return Math.Max(ancho, nodoAncho + espacioHorizontal);
         }
     }
 }
+

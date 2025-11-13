@@ -32,6 +32,9 @@
                 <TextBlock Text="Apellido" Foreground="White"/>
                 <TextBox x:Name="txtApellido" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
+                <TextBlock Text="Padre (nombre)" Foreground="White" FontWeight="Bold"/>
+                <TextBox x:Name="txtPadre" Background="#444" Foreground="White" Margin="0,5,0,10"/>
+                
                 <TextBlock Text="Ciudad de Residencia" Foreground="White"/>
                 <TextBox x:Name="txtCiudad" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
