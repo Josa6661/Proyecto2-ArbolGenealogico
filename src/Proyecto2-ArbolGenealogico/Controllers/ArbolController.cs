@@ -64,10 +64,10 @@ namespace Proyecto2_ArbolGenealogico.Controllers
         }
 
         // Obtener todos los miembros
-        public List<NodoFamiliar> ObtenerTodos()
+        public ListaEnlazada<NodoFamiliar> ObtenerTodos()
         {
             var lista = _service.ObtenerTodos();
-            Debug.WriteLine($"[Controller] Se obtuvieron {lista.Count} miembros del árbol.");
+            Debug.WriteLine($"[Controller] Se obtuvieron {lista.Largo()} miembros del árbol.");
             return lista;
         }
     }

@@ -34,6 +34,10 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             if (actual.Nombre == nombre)
                 return actual;
 
+            // Buscar en el cónyuge
+            if (actual.Conyuge != null && actual.Conyuge.Nombre == nombre)
+                return actual.Conyuge;
+
             for (int i = 0; i < actual.Hijos.Largo(); i++)
             {
                 var encontrado = BuscarPorNombreRecursivo(actual.Hijos.Obtener(i), nombre);
@@ -97,19 +101,47 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             Raiz = null;
         }
 
-        public List<NodoFamiliar> ObtenerTodos()
+        public ListaEnlazada<NodoFamiliar> ObtenerTodos()
         {
-            var lista = new List<NodoFamiliar>();
+            var lista = new ListaEnlazada<NodoFamiliar>();
             ObtenerTodosRecursivo(Raiz, lista);
             return lista;
         }
 
-        private void ObtenerTodosRecursivo(NodoFamiliar actual, List<NodoFamiliar> lista)
+        // Obtiene solo los nodos en la jerarquía del árbol (sin cónyuges)
+        public ListaEnlazada<NodoFamiliar> ObtenerNodosJerarquicos()
+        {
+            var lista = new ListaEnlazada<NodoFamiliar>();
+            ObtenerNodosJerarquicosRecursivo(Raiz, lista);
+            return lista;
+        }
+
+        private void ObtenerNodosJerarquicosRecursivo(NodoFamiliar actual, ListaEnlazada<NodoFamiliar> lista)
         {
             if (actual == null)
                 return;
 
-            lista.Add(actual);
+            lista.AgregarFinal(actual);
+
+            // NO agregar el cónyuge, solo los descendientes
+            for (int i = 0; i < actual.Hijos.Largo(); i++)
+            {
+                ObtenerNodosJerarquicosRecursivo(actual.Hijos.Obtener(i), lista);
+            }
+        }
+
+        private void ObtenerTodosRecursivo(NodoFamiliar actual, ListaEnlazada<NodoFamiliar> lista)
+        {
+            if (actual == null)
+                return;
+
+            lista.AgregarFinal(actual);
+
+            // Agregar el cónyuge si existe y no está ya en la lista
+            if (actual.Conyuge != null && !lista.Contiene(actual.Conyuge))
+            {
+                lista.AgregarFinal(actual.Conyuge);
+            }
 
             for (int i = 0; i < actual.Hijos.Largo(); i++)
             {
@@ -131,6 +163,10 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             if (actual.Cedula == cedula)
                 return actual;
 
+            // Buscar en el cónyuge
+            if (actual.Conyuge != null && actual.Conyuge.Cedula == cedula)
+                return actual.Conyuge;
+
             for (int i = 0; i < actual.Hijos.Largo(); i++)
             {
                 var encontrado = BuscarPorCedulaRecursivo(actual.Hijos.Obtener(i), cedula);
@@ -151,6 +187,20 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             }
             // El nuevo padre se convierte en la nueva raíz
             Raiz = nuevoPadre;
+        }
+
+        // Agregar cónyuge a un miembro existente
+        public bool AgregarConyuge(string nombreMiembro, NodoFamiliar conyuge)
+        {
+            var miembro = BuscarPorNombre(nombreMiembro);
+            if (miembro == null)
+                return false;
+
+            if (miembro.Conyuge != null)
+                return false; // Ya tiene cónyuge
+
+            miembro.EstablecerConyuge(conyuge);
+            return true;
         }
     }
 }

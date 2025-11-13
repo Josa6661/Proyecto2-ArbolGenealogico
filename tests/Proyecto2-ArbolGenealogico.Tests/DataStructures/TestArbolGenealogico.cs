@@ -196,7 +196,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             var lista = arbol.ObtenerTodos();
 
             Assert.NotNull(lista);
-            Assert.Empty(lista);
+            Assert.Equal(0, lista.Largo());
         }
 
         [Fact]
@@ -211,10 +211,18 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
 
             var lista = arbol.ObtenerTodos();
 
-            Assert.Equal(3, lista.Count);
-            Assert.Contains(lista, m => m.Nombre == "Abuelo");
-            Assert.Contains(lista, m => m.Nombre == "Padre");
-            Assert.Contains(lista, m => m.Nombre == "Nieto");
+            Assert.Equal(3, lista.Largo());
+            bool tieneAbuelo = false, tienePadre = false, tieneNieto = false;
+            for (int i = 0; i < lista.Largo(); i++)
+            {
+                var miembro = lista.Obtener(i);
+                if (miembro.Nombre == "Abuelo") tieneAbuelo = true;
+                if (miembro.Nombre == "Padre") tienePadre = true;
+                if (miembro.Nombre == "Nieto") tieneNieto = true;
+            }
+            Assert.True(tieneAbuelo);
+            Assert.True(tienePadre);
+            Assert.True(tieneNieto);
         }
 
         [Fact]
@@ -229,7 +237,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             arbol.AgregarMiembro("Padre", new NodoFamiliar("Hijo3", "444444444", "01/01/2005", 19, "ruta/foto.jpg", 0, 0));
 
             Assert.Equal(3, arbol.Raiz.Hijos.Largo());
-            Assert.Equal(4, arbol.ObtenerTodos().Count);
+            Assert.Equal(4, arbol.ObtenerTodos().Largo());
         }
     }
 }

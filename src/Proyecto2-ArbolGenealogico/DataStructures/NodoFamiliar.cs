@@ -13,6 +13,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public double Latitud { get; set; }
         public double Longitud { get; set; }
         public NodoFamiliar Padre { get; set; }
+        public NodoFamiliar Conyuge { get; set; }
         public ListaEnlazada<NodoFamiliar> Hijos { get; set; }
 
         public NodoFamiliar(string nombre, string cedula, string fechaNacimiento, int edad, string fotoRuta, double latitud, double longitud)
@@ -25,6 +26,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             Latitud = latitud;
             Longitud = longitud;
             Padre = null;
+            Conyuge = null;
             Hijos = new ListaEnlazada<NodoFamiliar>();
         }
 
@@ -33,6 +35,13 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         {
             Hijos.AgregarFinal(hijo);
             hijo.Padre = this;
+        }
+
+        // Establece la relación de cónyuge (bidireccional)
+        public void EstablecerConyuge(NodoFamiliar conyuge)
+        {
+            this.Conyuge = conyuge;
+            conyuge.Conyuge = this;
         }
     }
 }

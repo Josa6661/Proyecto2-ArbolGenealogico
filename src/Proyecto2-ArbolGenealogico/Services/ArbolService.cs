@@ -44,7 +44,7 @@ public class ArbolService
         {
             Arbol.Limpiar();
         }
-        public List<NodoFamiliar> ObtenerTodos()
+        public ListaEnlazada<NodoFamiliar> ObtenerTodos()
         {
             return Arbol.ObtenerTodos();
         }

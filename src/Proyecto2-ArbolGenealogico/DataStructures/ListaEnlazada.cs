@@ -122,5 +122,18 @@
 
         // Devuelve cantidad de nodos
         public int Largo() => cantidad;
+
+        // Verifica si la lista contiene un valor
+        public bool Contiene(T valor)
+        {
+            NodoLista<T> actual = cabeza;
+            while (actual != null)
+            {
+                if (actual.Valor.Equals(valor))
+                    return true;
+                actual = actual.Siguiente;
+            }
+            return false;
+        }
     }
 }
