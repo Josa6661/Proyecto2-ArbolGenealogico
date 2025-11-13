@@ -116,5 +116,29 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
                 ObtenerTodosRecursivo(actual.Hijos.Obtener(i), lista);
             }
         }
+
+        // Buscar por cédula para evitar duplicados
+        public NodoFamiliar BuscarPorCedula(string cedula)
+        {
+            return BuscarPorCedulaRecursivo(Raiz, cedula);
+        }
+
+        private NodoFamiliar BuscarPorCedulaRecursivo(NodoFamiliar actual, string cedula)
+        {
+            if (actual == null)
+                return null;
+
+            if (actual.Cedula == cedula)
+                return actual;
+
+            for (int i = 0; i < actual.Hijos.Largo(); i++)
+            {
+                var encontrado = BuscarPorCedulaRecursivo(actual.Hijos.Obtener(i), cedula);
+                if (encontrado != null)
+                    return encontrado;
+            }
+
+            return null;
+        }
     }
 }

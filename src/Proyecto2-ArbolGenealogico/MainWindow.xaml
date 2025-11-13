@@ -17,48 +17,91 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Panel lateral -->
-        <Border Grid.Column="0" Background="#13243C" Padding="20" CornerRadius="5">
-            <StackPanel VerticalAlignment="Top" Margin="0,10">
-                <TextBlock Text="Agregar Familiar"
-                           FontSize="18"
-                           FontWeight="Bold"
-                           Foreground="#64B5F6"
-                           Margin="0,0,0,15"/>
+        <!-- Panel lateral con scroll -->
+        <Border Grid.Column="0" Background="#13243C" CornerRadius="5">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20">
+                <StackPanel VerticalAlignment="Top" Margin="0,10">
+                    <TextBlock Text="Agregar Familiar"
+                               FontSize="18"
+                               FontWeight="Bold"
+                               Foreground="#64B5F6"
+                               Margin="0,0,0,15"/>
 
-                <TextBlock Text="Nombre" Foreground="White"/>
-                <TextBox x:Name="txtNombre" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
+                    <!-- Nombre Completo -->
+                    <TextBlock Text="Nombre Completo *" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtNombre" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
-                <TextBlock Text="Apellido" Foreground="White"/>
-                <TextBox x:Name="txtApellido" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
+                    <!-- Cédula -->
+                    <TextBlock Text="Cédula *" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtCedula" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
-                <TextBlock Text="Padre (nombre)" Foreground="White" FontWeight="Bold"/>
-                <TextBox x:Name="txtPadre" Background="#444" Foreground="White" Margin="0,5,0,10"/>
-                
-                <TextBlock Text="Ciudad de Residencia" Foreground="White"/>
-                <TextBox x:Name="txtCiudad" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
+                    <!-- Fecha de Nacimiento -->
+                    <TextBlock Text="Fecha de Nacimiento (dd/MM/yyyy) *" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtFechaNacimiento" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White" 
+                             ToolTip="Ejemplo: 15/03/1990"/>
 
-                <TextBlock Text="País de Residencia" Foreground="White"/>
-                <TextBox x:Name="txtPais" Margin="0,5,0,20" Background="#1E2F4C" Foreground="White"/>
+                    <!-- Edad -->
+                    <TextBlock Text="Edad *" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBox x:Name="txtEdad" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Cancelar"
-                            Width="90"
-                            Margin="0,0,10,0"
-                            Background="#25364F"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"/>
-                    <Button Content="Agregar"
-                            Width="90"
-                            Background="#2196F3"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            Click="Agregar_Click"/>
+                    <!-- Fotografía -->
+                    <TextBlock Text="Fotografía" Foreground="White" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,10">
+                        <TextBox x:Name="txtFotoRuta" Width="150" Background="#1E2F4C" Foreground="White" 
+                                 IsReadOnly="True" ToolTip="Ruta de la imagen"/>
+                        <Button Content="Explorar..." Width="80" Margin="5,0,0,0" 
+                                Background="#25364F" Foreground="White" 
+                                BorderThickness="0" Cursor="Hand"
+                                Click="ExplorarFoto_Click"/>
+                    </StackPanel>
 
+                    <!-- Coordenadas -->
+                    <TextBlock Text="Coordenadas de Residencia *" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,5"/>
+                    
+                    <TextBlock Text="Latitud" Foreground="#B0BEC5" FontSize="11"/>
+                    <TextBox x:Name="txtLatitud" Margin="0,2,0,8" Background="#1E2F4C" Foreground="White"
+                             ToolTip="Ejemplo: 9.9281"/>
+                    
+                    <TextBlock Text="Longitud" Foreground="#B0BEC5" FontSize="11"/>
+                    <TextBox x:Name="txtLongitud" Margin="0,2,0,10" Background="#1E2F4C" Foreground="White"
+                             ToolTip="Ejemplo: -84.0907"/>
+
+                    <!-- Padre (opcional) -->
+                    <TextBlock Text="Seleccionar Padre (opcional)" Foreground="White" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="cmbPadre" 
+                              Background="#1E2F4C" 
+                              Foreground="Blue" 
+                              Margin="0,5,0,5"
+                              IsEditable="True"
+                              IsTextSearchEnabled="True"
+                              ToolTip="Selecciona o escribe el nombre del padre. Dejar vacío si es la raíz del árbol"/>
+                    
+                    <TextBlock Text="(Dejar vacío para crear la raíz del árbol)" 
+                               Foreground="#B0BEC5" 
+                               FontSize="10" 
+                               FontStyle="Italic"
+                               Margin="0,0,0,15"/>
+
+                    <!-- Botones -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="Limpiar"
+                                Width="90"
+                                Margin="0,0,10,0"
+                                Background="#25364F"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="Limpiar_Click"/>
+                        <Button Content="Agregar"
+                                Width="90"
+                                Background="#2196F3"
+                                Foreground="White"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="Agregar_Click"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+            </ScrollViewer>
         </Border>
 
         <!-- Área del árbol genealógico -->
