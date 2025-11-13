@@ -76,6 +76,15 @@
                               IsTextSearchEnabled="True"
                               ToolTip="Selecciona o escribe el nombre del padre. Dejar vacío si es la raíz del árbol"/>
                     
+                    <CheckBox x:Name="chkEsPadreDeRaiz"
+                              Content="Este será padre de la raíz actual"
+                              Foreground="#FFD54F"
+                              Margin="0,5,0,5"
+                              FontWeight="SemiBold"
+                              Checked="ChkEsPadreDeRaiz_Checked"
+                              Unchecked="ChkEsPadreDeRaiz_Unchecked"
+                              ToolTip="Marca esta opción si quieres agregar un ancestro al nodo raíz actual"/>
+                    
                     <TextBlock Text="(Dejar vacío para crear la raíz del árbol)" 
                                Foreground="#B0BEC5" 
                                FontSize="10" 

@@ -140,5 +140,17 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
 
             return null;
         }
+
+        // Agregar un padre a la raíz actual (convierte la raíz actual en hijo del nuevo padre)
+        public void AgregarPadreARaiz(NodoFamiliar nuevoPadre)
+        {
+            if (Raiz != null)
+            {
+                // La raíz actual se convierte en hijo del nuevo padre
+                nuevoPadre.AgregarHijo(Raiz);
+            }
+            // El nuevo padre se convierte en la nueva raíz
+            Raiz = nuevoPadre;
+        }
     }
 }

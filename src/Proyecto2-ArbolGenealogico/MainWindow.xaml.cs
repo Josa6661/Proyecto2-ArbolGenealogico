@@ -39,6 +39,7 @@ namespace Proyecto2_ArbolGenealogico
         {
             InitializeComponent();
             sistema = new SistemaFamiliar();
+            chkEsPadreDeRaiz.Visibility = Visibility.Collapsed; // Ocultar inicialmente
             ActualizarListaPadres();
         }
 
@@ -55,6 +56,14 @@ namespace Proyecto2_ArbolGenealogico
                     // Agregar el nombre completo (se puede personalizar con más info)
                     cmbPadre.Items.Add(miembro.Nombre);
                 }
+                
+                // Mostrar el checkbox de "padre de raíz" solo cuando hay una raíz
+                chkEsPadreDeRaiz.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                // Ocultar el checkbox si no hay raíz
+                chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
             }
 
             // Mensaje informativo si no hay padres disponibles
@@ -64,6 +73,25 @@ namespace Proyecto2_ArbolGenealogico
                 cmbPadre.IsEnabled = false;
             }
             else
+            {
+                cmbPadre.IsEnabled = true;
+            }
+        }
+
+        // Manejar cuando se marca el checkbox de "padre de raíz"
+        private void ChkEsPadreDeRaiz_Checked(object sender, RoutedEventArgs e)
+        {
+            // Deshabilitar el ComboBox de padre cuando se marca esta opción
+            cmbPadre.IsEnabled = false;
+            cmbPadre.SelectedIndex = -1;
+            cmbPadre.Text = "";
+        }
+
+        // Manejar cuando se desmarca el checkbox de "padre de raíz"
+        private void ChkEsPadreDeRaiz_Unchecked(object sender, RoutedEventArgs e)
+        {
+            // Habilitar el ComboBox de padre nuevamente
+            if (sistema.Arbol.TieneRaiz())
             {
                 cmbPadre.IsEnabled = true;
             }
@@ -173,8 +201,54 @@ namespace Proyecto2_ArbolGenealogico
                 return;
             }
 
-            // Validar relación padre-hijo (si hay padre especificado)
-            if (!string.IsNullOrWhiteSpace(padreNombre) && padreNombre != "(Sin familiares en el árbol)")
+            // Validar si se está agregando un padre a la raíz
+            bool esPadreDeRaiz = chkEsPadreDeRaiz.IsChecked == true;
+
+            // Si es padre de raíz, validar con el nodo raíz actual
+            if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
+            {
+                var raizActual = sistema.Arbol.Raiz;
+                
+                // Validar que el nuevo padre sea mayor que la raíz actual
+                if (raizActual.Edad >= edad)
+                {
+                    MessageBox.Show($"El padre debe ser mayor que la raíz actual del árbol.\n" +
+                        $"Edad de la raíz actual '{raizActual.Nombre}': {raizActual.Edad} años\n" +
+                        $"Edad del nuevo padre: {edad} años", 
+                        "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validar fechas de nacimiento
+                if (!string.IsNullOrEmpty(raizActual.FechaNacimiento))
+                {
+                    if (DateTime.TryParseExact(raizActual.FechaNacimiento, "dd/MM/yyyy", 
+                        System.Globalization.CultureInfo.InvariantCulture, 
+                        System.Globalization.DateTimeStyles.None, out DateTime fechaNacRaiz))
+                    {
+                        if (fechaNac >= fechaNacRaiz)
+                        {
+                            MessageBox.Show($"El padre debe nacer antes que la raíz actual.\n" +
+                                $"Fecha de nacimiento de la raíz: {raizActual.FechaNacimiento}\n" +
+                                $"Fecha de nacimiento del padre: {fechaNacimiento}", 
+                                "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        // Validar que el padre tenga al menos 10 años cuando nace la raíz
+                        int añosDiferencia = fechaNacRaiz.Year - fechaNac.Year;
+                        if (añosDiferencia < 10)
+                        {
+                            MessageBox.Show($"El padre debe tener al menos 10 años cuando nace su hijo.\n" +
+                                $"Diferencia de edad: {añosDiferencia} años", 
+                                "Diferencia de Edad Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+                    }
+                }
+            }
+            // Validar relación padre-hijo (si hay padre especificado y NO es padre de raíz)
+            else if (!esPadreDeRaiz && !string.IsNullOrWhiteSpace(padreNombre) && padreNombre != "(Sin familiares en el árbol)")
             {
                 var padre = sistema.Arbol.BuscarPorNombre(padreNombre);
                 if (padre != null)
@@ -233,12 +307,24 @@ namespace Proyecto2_ArbolGenealogico
             // Agregar al sistema (árbol + grafo)
             bool exito = false;
             
-            if (!sistema.Arbol.TieneRaiz())
+            // Caso 1: Agregar un padre a la raíz actual
+            if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
+            {
+                string nombreRaizAnterior = sistema.Arbol.Raiz.Nombre;
+                sistema.Arbol.AgregarPadreARaiz(nuevo);
+                exito = true;
+                MessageBox.Show($"'{nombre}' ha sido agregado como padre de '{nombreRaizAnterior}' (antigua raíz).\n" +
+                    $"'{nombre}' es ahora la nueva raíz del árbol.", "Éxito", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            // Caso 2: Crear la primera raíz del árbol
+            else if (!sistema.Arbol.TieneRaiz())
             {
                 exito = sistema.AgregarMiembroCompleto("", nuevo);
                 MessageBox.Show($"'{nombre}' ha sido creado como raíz del árbol.", "Éxito", 
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            // Caso 3: Agregar un hijo a un padre existente
             else
             {
                 if (string.IsNullOrWhiteSpace(padreNombre) || padreNombre == "(Sin familiares en el árbol)")
@@ -265,6 +351,7 @@ namespace Proyecto2_ArbolGenealogico
 
             if (exito)
             {
+                chkEsPadreDeRaiz.IsChecked = false; // Desmarcar el checkbox
                 ActualizarListaPadres(); // Actualizar lista de padres disponibles
                 DibujarArbol();
                 LimpiarCampos();
