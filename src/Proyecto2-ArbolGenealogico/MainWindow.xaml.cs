@@ -20,6 +20,7 @@ namespace Proyecto2_ArbolGenealogico
             sistema = new SistemaFamiliar();
             arbolView = new ArbolView(ArbolCanvas);
             mapaService = new MapaService(MapaResidencias);
+            mapaService.ConfigurarOverlayCanvas(CanvasOverlayMapa);
             
             chkEsPadreDeRaiz.Visibility = Visibility.Collapsed; // Ocultar inicialmente
             cmbConyuge.Visibility = Visibility.Collapsed; // Ocultar inicialmente

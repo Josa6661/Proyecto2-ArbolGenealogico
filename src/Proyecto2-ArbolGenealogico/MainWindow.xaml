@@ -187,7 +187,16 @@
                 <TabItem Header="Mapa de Residencias">
                     <Grid Background="#0B1524">
                         <mapsui:MapControl x:Name="MapaResidencias"
-                                          Margin="10"/>
+                                          Margin="10"
+                                          HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"/>
+                        <!-- Canvas overlay para fotos de familiares -->
+                        <Canvas x:Name="CanvasOverlayMapa"
+                               Margin="10"
+                               IsHitTestVisible="True"
+                               Background="{x:Null}"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"/>
                     </Grid>
                 </TabItem>
             </TabControl>
