@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Proyecto2_ArbolGenealogico"
+        xmlns:mapsui="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
         mc:Ignorable="d"
         Title="Árbol Genealógico"
         Width="900" Height="600"
@@ -136,15 +137,60 @@
             </ScrollViewer>
         </Border>
 
-        <!-- Área del árbol genealógico -->
+        <!-- Área del árbol genealógico y mapa -->
         <Grid Grid.Column="1" Background="#0B1524">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto"
-                          Margin="10">
-                <Canvas x:Name="ArbolCanvas">
-                    <!-- Aquí se generarán los nodos dinámicamente -->
-                </Canvas>
-            </ScrollViewer>
+            <TabControl x:Name="MainTabControl" 
+                        Background="#0B1524"
+                        BorderThickness="0">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Background" Value="#13243C"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="Padding" Value="15,8"/>
+                        <Setter Property="Margin" Value="2,0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border Background="{TemplateBinding Background}"
+                                            BorderThickness="0"
+                                            CornerRadius="5,5,0,0"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter ContentSource="Header"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="#64B5F6"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#1E2F4C"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- Tab 1: Árbol Genealógico -->
+                <TabItem Header="Árbol Genealógico">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="10">
+                        <Canvas x:Name="ArbolCanvas">
+                            <!-- Aquí se generarán los nodos dinámicamente -->
+                        </Canvas>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- Tab 2: Mapa Mundial -->
+                <TabItem Header="Mapa de Residencias">
+                    <Grid Background="#0B1524">
+                        <mapsui:MapControl x:Name="MapaResidencias"
+                                          Margin="10"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
         </Grid>
     </Grid>
 </Window>

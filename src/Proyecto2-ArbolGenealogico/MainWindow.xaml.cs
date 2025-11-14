@@ -1,47 +1,31 @@
-﻿////using System.Text;
-////using System.Windows;
-////using System.Windows.Controls;
-////using System.Windows.Data;
-////using System.Windows.Documents;
-////using System.Windows.Input;
-////using System.Windows.Media;
-////using System.Windows.Media.Imaging;
-////using System.Windows.Navigation;
-////using System.Windows.Shapes;
-
-//namespace Proyecto2_ArbolGenealogico
-//{
-//    public partial class MainWindow : Window
-//    {
-//        public MainWindow()
-//        {
-//            InitializeComponent();
-//        }
-//    }
-//}
-using Proyecto2_ArbolGenealogico.DataStructures;
+﻿using Proyecto2_ArbolGenealogico.DataStructures;
+using Proyecto2_ArbolGenealogico.Helpers;
+using Proyecto2_ArbolGenealogico.Services;
+using Proyecto2_ArbolGenealogico.Views;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Proyecto2_ArbolGenealogico
 {
     public partial class MainWindow : Window
     {
         private SistemaFamiliar sistema;
-        private double nodoAncho = 120;
-        private double nodoAlto = 100;
-        private double espacioHorizontal = 80;
-        private double espacioVertical = 140;
+        private ArbolView arbolView;
+        private MapaService mapaService;
 
         public MainWindow()
         {
             InitializeComponent();
             sistema = new SistemaFamiliar();
+            arbolView = new ArbolView(ArbolCanvas);
+            mapaService = new MapaService(MapaResidencias);
+            
             chkEsPadreDeRaiz.Visibility = Visibility.Collapsed; // Ocultar inicialmente
             cmbConyuge.Visibility = Visibility.Collapsed; // Ocultar inicialmente
+            
             ActualizarListaPadres();
+            mapaService.ConfigurarMapa();
         }
 
         // Actualiza la lista de padres disponibles en el ComboBox
@@ -209,33 +193,19 @@ namespace Proyecto2_ArbolGenealogico
             string fotoRuta = txtFotoRuta.Text.Trim();
             string padreNombre = cmbPadre.Text.Trim();
 
-            // Validaciones
-            if (string.IsNullOrWhiteSpace(nombre))
+            // Validaciones usando ValidacionHelper
+            if (!ValidacionHelper.ValidarCamposRequeridos(nombre, cedula, fechaNacimiento, edadTexto, latitudTexto, longitudTexto, out string mensajeCampos))
             {
-                MessageBox.Show("Por favor, ingresa el nombre completo.", "Campo Requerido", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(mensajeCampos, "Campo Requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(cedula))
+            if (!ValidacionHelper.ValidarCedula(cedula, out string mensajeCedula))
             {
-                MessageBox.Show("Por favor, ingresa la cédula.", "Campo Requerido", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(mensajeCedula, "Cédula Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Validar que la cédula sea solo números
-            foreach (char c in cedula)
-            {
-                if (c < '0' || c > '9')
-                {
-                    MessageBox.Show("La cédula solo debe contener números.", "Cédula Inválida", 
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-            }
-
-            // Validar que la cédula no esté duplicada
             if (sistema.Arbol.BuscarPorCedula(cedula) != null)
             {
                 MessageBox.Show($"Ya existe un familiar con la cédula '{cedula}'.\nCada miembro debe tener una cédula única.", 
@@ -243,20 +213,13 @@ namespace Proyecto2_ArbolGenealogico
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(fechaNacimiento))
+            if (!ValidacionHelper.ValidarFecha(fechaNacimiento, out DateTime fechaNac))
             {
-                MessageBox.Show("Por favor, ingresa la fecha de nacimiento.", "Campo Requerido", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).", 
+                    "Fecha Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            // Validar formato de fecha de nacimiento (dd/MM/yyyy)
-            if (!DateTime.TryParseExact(fechaNacimiento, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime fechaNac))
-            {
-                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).", "Fecha Inválida", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
             if (fechaNac > DateTime.Now)
             {
                 MessageBox.Show("La fecha de nacimiento no puede ser en el futuro.", "Fecha Inválida", 
@@ -271,14 +234,12 @@ namespace Proyecto2_ArbolGenealogico
                 return;
             }
 
-            // Validar que la edad coincida exactamente con la fecha de nacimiento
-            int edadCalculada = DateTime.Now.Year - fechaNac.Year;
-            // Ajustar si el cumpleaños aún no ha pasado este año
-            if (fechaNac.Date > DateTime.Now.AddYears(-edadCalculada)) 
-                edadCalculada--;
-            
-            if (edad != edadCalculada)
+            if (!ValidacionHelper.ValidarEdad(fechaNac, edad, out string mensajeEdad))
             {
+                int edadCalculada = DateTime.Now.Year - fechaNac.Year;
+                if (fechaNac.Date > DateTime.Now.AddYears(-edadCalculada))
+                    edadCalculada--;
+                    
                 MessageBox.Show($"La edad ingresada ({edad}) no coincide con la fecha de nacimiento ({fechaNacimiento}).\n" +
                     $"La edad correcta basada en tu fecha de nacimiento es {edadCalculada} años.\n\n" +
                     $"Fecha actual: {DateTime.Now:dd/MM/yyyy}", 
@@ -286,17 +247,9 @@ namespace Proyecto2_ArbolGenealogico
                 return;
             }
 
-            if (!double.TryParse(latitudTexto, out double latitud) || latitud < -90 || latitud > 90)
+            if (!ValidacionHelper.ValidarCoordenadas(latitudTexto, longitudTexto, out double latitud, out double longitud, out string mensajeCoordenadas))
             {
-                MessageBox.Show("Por favor, ingresa una latitud válida (-90 a 90).", "Coordenada Inválida", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!double.TryParse(longitudTexto, out double longitud) || longitud < -180 || longitud > 180)
-            {
-                MessageBox.Show("Por favor, ingresa una longitud válida (-180 a 180).", "Coordenada Inválida", 
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(mensajeCoordenadas, "Coordenada Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -397,9 +350,7 @@ namespace Proyecto2_ArbolGenealogico
                     // Validar fechas de nacimiento (hijo debe nacer después del padre)
                     if (!string.IsNullOrEmpty(padre.FechaNacimiento))
                     {
-                        if (DateTime.TryParseExact(padre.FechaNacimiento, "dd/MM/yyyy", 
-                            System.Globalization.CultureInfo.InvariantCulture, 
-                            System.Globalization.DateTimeStyles.None, out DateTime fechaNacPadre))
+                        if (ValidacionHelper.ValidarFecha(padre.FechaNacimiento, out DateTime fechaNacPadre))
                         {
                             if (fechaNac <= fechaNacPadre)
                             {
@@ -410,13 +361,11 @@ namespace Proyecto2_ArbolGenealogico
                                 return;
                             }
 
-                            // Validar que el padre tenga al menos 10 años cuando nace el hijo
-                            int añosDiferencia = fechaNac.Year - fechaNacPadre.Year;
-                            if (añosDiferencia < 10)
+                            // Validar diferencia de edad mínima usando ValidacionHelper
+                            if (!ValidacionHelper.ValidarDiferenciaEdadPadreHijo(fechaNacPadre, fechaNac, out string mensajeDiferencia))
                             {
-                                MessageBox.Show($"El padre debe tener al menos 10 años cuando nace el hijo.\n" +
-                                    $"Diferencia de edad: {añosDiferencia} años", 
-                                    "Diferencia de Edad Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                                MessageBox.Show(mensajeDiferencia, "Diferencia de Edad Inválida", 
+                                    MessageBoxButton.OK, MessageBoxImage.Warning);
                                 return;
                             }
                         }
@@ -500,7 +449,7 @@ namespace Proyecto2_ArbolGenealogico
             {
                 chkEsPadreDeRaiz.IsChecked = false; // Desmarcar el checkbox
                 ActualizarListaPadres(); // Actualizar listas de padres y cónyuges disponibles
-                DibujarArbol();
+                arbolView.DibujarArbol(sistema.Arbol);
                 LimpiarCampos();
             }
         }
@@ -602,7 +551,7 @@ namespace Proyecto2_ArbolGenealogico
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 
                 ActualizarListaPadres();
-                DibujarArbol();
+                arbolView.DibujarArbol(sistema.Arbol);
                 cmbEliminar.SelectedIndex = -1;
                 cmbEliminar.Text = "";
             }
@@ -626,193 +575,6 @@ namespace Proyecto2_ArbolGenealogico
             cmbPadre.Text = "";
             cmbConyuge.SelectedIndex = -1;
             cmbConyuge.Text = "";
-        }
-
-        // 🔹 Dibuja el árbol completo en el Canvas
-        private void DibujarArbol()
-        {
-            ArbolCanvas.Children.Clear();
-
-            if (!sistema.Arbol.TieneRaiz())
-                return;
-
-            // Calcular el ancho total del árbol para centrar y dimensionar el Canvas
-            double anchoArbol = CalcularAncho(sistema.Arbol.Raiz);
-            double alturaArbol = CalcularAltura(sistema.Arbol.Raiz) * espacioVertical + nodoAlto + 100;
-            
-            // Asegurar un tamaño mínimo del Canvas
-            double anchoCanvas = Math.Max(anchoArbol + 400, 1200);
-            double alturaCanvas = Math.Max(alturaArbol, 800);
-            
-            ArbolCanvas.Width = anchoCanvas;
-            ArbolCanvas.Height = alturaCanvas;
-
-            // Centrar el árbol en el Canvas
-            double startX = anchoCanvas / 2;
-            double startY = 60;
-            DibujarNodo(sistema.Arbol.Raiz, startX, startY);
-        }
-        
-        // Calcula la altura del árbol (número de niveles)
-        private int CalcularAltura(NodoFamiliar nodo)
-        {
-            if (nodo == null || nodo.Hijos.Largo() == 0)
-                return 1;
-
-            int alturaMaxima = 0;
-            for (int i = 0; i < nodo.Hijos.Largo(); i++)
-            {
-                int alturaHijo = CalcularAltura(nodo.Hijos.Obtener(i));
-                if (alturaHijo > alturaMaxima)
-                    alturaMaxima = alturaHijo;
-            }
-            return alturaMaxima + 1;
-        }
-
-        private double DibujarNodo(NodoFamiliar persona, double x, double y)
-        {
-            double anchoTotal = nodoAncho;
-            double xNodoPrincipal = x;
-
-            // Si tiene cónyuge, ajustar posiciones para dibujar ambos lado a lado
-            if (persona.Conyuge != null)
-            {
-                double espacioEntreConyuges = 20;
-                anchoTotal = nodoAncho * 2 + espacioEntreConyuges;
-                xNodoPrincipal = x - (nodoAncho + espacioEntreConyuges) / 2;
-                double xConyuge = xNodoPrincipal + nodoAncho + espacioEntreConyuges;
-
-                // Dibuja el nodo del cónyuge
-                Ellipse nodoConyuge = new Ellipse
-                {
-                    Width = nodoAncho,
-                    Height = nodoAlto,
-                    Stroke = new SolidColorBrush(Color.FromRgb(129, 199, 132)), // Verde para cónyuge
-                    StrokeThickness = 2
-                };
-                TextBlock textoConyuge = new TextBlock
-                {
-                    Text = persona.Conyuge.Nombre,
-                    Foreground = Brushes.White,
-                    FontSize = 11,
-                    TextAlignment = TextAlignment.Center,
-                    Width = nodoAncho - 10,
-                    TextWrapping = TextWrapping.Wrap,
-                    Padding = new Thickness(5)
-                };
-
-                // Medir el texto para centrarlo verticalmente
-                textoConyuge.Measure(new Size(nodoAncho - 10, nodoAlto - 10));
-                double alturaTextoConyuge = textoConyuge.DesiredSize.Height;
-
-                Canvas.SetLeft(nodoConyuge, xConyuge - nodoAncho / 2);
-                Canvas.SetTop(nodoConyuge, y);
-                Canvas.SetLeft(textoConyuge, xConyuge - nodoAncho / 2 + 5);
-                Canvas.SetTop(textoConyuge, y + (nodoAlto - alturaTextoConyuge) / 2);
-
-                ArbolCanvas.Children.Add(nodoConyuge);
-                ArbolCanvas.Children.Add(textoConyuge);
-
-                // Línea horizontal conectando los cónyuges
-                Line lineaConyuge = new Line
-                {
-                    X1 = xNodoPrincipal + nodoAncho / 2,
-                    Y1 = y + nodoAlto / 2,
-                    X2 = xConyuge - nodoAncho / 2,
-                    Y2 = y + nodoAlto / 2,
-                    Stroke = new SolidColorBrush(Color.FromRgb(129, 199, 132)),
-                    StrokeThickness = 3
-                };
-                ArbolCanvas.Children.Add(lineaConyuge);
-            }
-
-            // Dibuja el nodo principal
-            Ellipse nodo = new Ellipse
-            {
-                Width = nodoAncho,
-                Height = nodoAlto,
-                Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)),
-                StrokeThickness = 2
-            };
-            TextBlock texto = new TextBlock
-            {
-                Text = persona.Nombre,
-                Foreground = Brushes.White,
-                FontSize = 11,
-                TextAlignment = TextAlignment.Center,
-                Width = nodoAncho - 10,
-                TextWrapping = TextWrapping.Wrap,
-                Padding = new Thickness(5)
-            };
-
-            // Medir el texto para centrarlo verticalmente
-            texto.Measure(new Size(nodoAncho - 10, nodoAlto - 10));
-            double alturaTexto = texto.DesiredSize.Height;
-
-            Canvas.SetLeft(nodo, xNodoPrincipal - nodoAncho / 2);
-            Canvas.SetTop(nodo, y);
-            Canvas.SetLeft(texto, xNodoPrincipal - nodoAncho / 2 + 5);
-            Canvas.SetTop(texto, y + (nodoAlto - alturaTexto) / 2);
-
-            ArbolCanvas.Children.Add(nodo);
-            ArbolCanvas.Children.Add(texto);
-
-            if (persona.Hijos.Largo() == 0)
-                return Math.Max(nodoAncho, anchoTotal);
-
-            // Calcular ancho total de los hijos
-            double totalAnchoHijos = 0;
-            for (int i = 0; i < persona.Hijos.Largo(); i++)
-                totalAnchoHijos += CalcularAncho(persona.Hijos.Obtener(i));
-
-            double xInicio = x - totalAnchoHijos / 2;
-            
-            // Punto central de la pareja (si hay cónyuge)
-            double xCentroPareja = x;
-
-            for (int i = 0; i < persona.Hijos.Largo(); i++)
-            {
-                var hijo = persona.Hijos.Obtener(i);
-                double anchoHijo = CalcularAncho(hijo);
-                double xHijo = xInicio + anchoHijo / 2;
-
-                // Línea de conexión (desde borde inferior del padre hasta borde superior del hijo)
-                Line linea = new Line
-                {
-                    X1 = xCentroPareja,
-                    Y1 = y + nodoAlto,  // Borde inferior del padre
-                    X2 = xHijo,
-                    Y2 = y + espacioVertical,  // Borde superior del hijo
-                    Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)),
-                    StrokeThickness = 2
-                };
-                ArbolCanvas.Children.Add(linea);
-
-                // Dibuja hijo recursivamente
-                DibujarNodo(hijo, xHijo, y + espacioVertical);
-                xInicio += anchoHijo;
-            }
-
-            return Math.Max(totalAnchoHijos, anchoTotal);
-        }
-
-        private double CalcularAncho(NodoFamiliar persona)
-        {
-            // Ancho base: si tiene cónyuge, necesita espacio para ambos
-            double anchoBase = nodoAncho + espacioHorizontal;
-            if (persona.Conyuge != null)
-            {
-                anchoBase = (nodoAncho * 2 + 20) + espacioHorizontal; // Dos nodos + espacio entre ellos
-            }
-
-            if (persona.Hijos.Largo() == 0)
-                return anchoBase;
-
-            double ancho = 0;
-            for (int i = 0; i < persona.Hijos.Largo(); i++)
-                ancho += CalcularAncho(persona.Hijos.Obtener(i));
-
-            return Math.Max(ancho, anchoBase);
         }
     }
 }
