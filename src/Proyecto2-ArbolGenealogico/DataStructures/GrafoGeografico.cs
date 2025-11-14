@@ -1,9 +1,26 @@
-﻿namespace Proyecto2_ArbolGenealogico.DataStructures
+﻿using Proyecto2_ArbolGenealogico.Services;
+
+namespace Proyecto2_ArbolGenealogico.DataStructures
 {
     public class GrafoGeografico
     {
-        private readonly Dictionary<string, NodoGrafo>  nodos; // cedula -> nodo
-        private readonly Dictionary<string, Dictionary<string, double>> distancias; // matriz de adyacencia
+        private ListaEnlazada<NodoGrafo> nodos;
+        private ListaEnlazada<DistanciaEntreNodos> distancias;
+
+        // Clase auxiliar para almacenar distancias
+        private class DistanciaEntreNodos
+        {
+            public string Cedula1 { get; set; }
+            public string Cedula2 { get; set; }
+            public double Distancia { get; set; }
+
+            public DistanciaEntreNodos(string ced1, string ced2, double dist)
+            {
+                Cedula1 = ced1;
+                Cedula2 = ced2;
+                Distancia = dist;
+            }
+        }
 
         public class NodoGrafo
         {
@@ -12,6 +29,7 @@
             public double Latitud { get; set; }
             public double Longitud { get; set; }
             public string FotoRuta { get; set; }
+            public NodoFamiliar MiembroFamiliar { get; set; }
 
             public NodoGrafo(string cedula, string nombre, double lat, double lon, string foto)
             {
@@ -21,96 +39,160 @@
                 Longitud = lon;
                 FotoRuta = foto;
             }
+
+            public NodoGrafo(NodoFamiliar miembro)
+            {
+                MiembroFamiliar = miembro;
+                Cedula = miembro.Cedula;
+                Nombre = miembro.Nombre;
+                Latitud = miembro.Latitud;
+                Longitud = miembro.Longitud;
+                FotoRuta = miembro.FotoRuta;
+            }
         }
 
         public GrafoGeografico()
         {
-            nodos = new Dictionary<string, NodoGrafo>();
-            distancias = new Dictionary<string, Dictionary<string, double>>();
+            nodos = new ListaEnlazada<NodoGrafo>();
+            distancias = new ListaEnlazada<DistanciaEntreNodos>();
+        }
+
+        // Construir el grafo desde un árbol genealógico
+        public void ConstruirDesdeArbol(ArbolGenealogico arbol)
+        {
+            nodos = new ListaEnlazada<NodoGrafo>();
+            distancias = new ListaEnlazada<DistanciaEntreNodos>();
+
+            if (!arbol.TieneRaiz())
+                return;
+
+            var todosLosMiembros = arbol.ObtenerTodos();
+            
+            for (int i = 0; i < todosLosMiembros.Largo(); i++)
+            {
+                var miembro = todosLosMiembros.Obtener(i);
+                var nodo = new NodoGrafo(miembro);
+                AgregarNodo(nodo);
+            }
+
+            // Calcular todas las distancias
+            RecalcularTodasDistancias();
         }
 
         // Agrega un nodo al grafo
         public void AgregarNodo(NodoGrafo nodo)
         {
-            if (!nodos.ContainsKey(nodo.Cedula))
+            // Verificar si ya existe
+            bool existe = false;
+            for (int i = 0; i < nodos.Largo(); i++)
             {
-                nodos[nodo.Cedula] = nodo;
-                distancias[nodo.Cedula] = new Dictionary<string, double>();
+                if (nodos.Obtener(i).Cedula == nodo.Cedula)
+                {
+                    existe = true;
+                    break;
+                }
             }
+
+            if (!existe)
+            {
+                nodos.AgregarFinal(nodo);
+            }
+        }
+
+        // Buscar nodo por cédula
+        private NodoGrafo BuscarNodo(string cedula)
+        {
+            for (int i = 0; i < nodos.Largo(); i++)
+            {
+                var nodo = nodos.Obtener(i);
+                if (nodo.Cedula == cedula)
+                    return nodo;
+            }
+            return null;
+        }
+
+        // Buscar nodo por nombre
+        public NodoGrafo BuscarPorNombre(string nombre)
+        {
+            for (int i = 0; i < nodos.Largo(); i++)
+            {
+                var nodo = nodos.Obtener(i);
+                if (nodo.Nombre == nombre)
+                    return nodo;
+            }
+            return null;
         }
 
         // Calcula y almacena distancia entre dos nodos
         public void CalcularYGuardarDistancia(string cedula1, string cedula2)
         {
-            if (!nodos.ContainsKey(cedula1) || !nodos.ContainsKey(cedula2))
+            var nodo1 = BuscarNodo(cedula1);
+            var nodo2 = BuscarNodo(cedula2);
+
+            if (nodo1 == null || nodo2 == null)
                 return;
 
-            var nodo1 = nodos[cedula1];
-            var nodo2 = nodos[cedula2];
-
-            double distancia = CalcularDistanciaHaversine(
+            double distancia = MapaService.CalcularDistanciaHaversine(
                 nodo1.Latitud, nodo1.Longitud,
                 nodo2.Latitud, nodo2.Longitud
             );
 
-            // Grafo no dirigido (bidireccional)
-            distancias[cedula1][cedula2] = distancia;
-            distancias[cedula2][cedula1] = distancia;
-        }
-
-        // Fórmula de Haversine para distancia geográfica
-        private static double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double R = 6371; // Radio de la Tierra en km
-
-            double dLat = ToRadianes(lat2 - lat1);
-            double dLon = ToRadianes(lon2 - lon1);
-
-            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                       Math.Cos(ToRadianes(lat1)) * Math.Cos(ToRadianes(lat2)) *
-                       Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            return R * c;
-        }
-
-        private static double ToRadianes(double grados)
-        {
-            return grados * Math.PI / 180;
+            // Agregar distancia
+            distancias.AgregarFinal(new DistanciaEntreNodos(cedula1, cedula2, distancia));
         }
 
         // Obtiene distancia entre dos nodos
         public double ObtenerDistancia(string cedula1, string cedula2)
         {
-            if (distancias.ContainsKey(cedula1) && distancias[cedula1].ContainsKey(cedula2))
-                return distancias[cedula1][cedula2];
+            for (int i = 0; i < distancias.Largo(); i++)
+            {
+                var dist = distancias.Obtener(i);
+                if ((dist.Cedula1 == cedula1 && dist.Cedula2 == cedula2) ||
+                    (dist.Cedula1 == cedula2 && dist.Cedula2 == cedula1))
+                {
+                    return dist.Distancia;
+                }
+            }
             return -1; // No calculada
         }
 
         // Obtiene todas las distancias desde un nodo específico
-        public Dictionary<string, double> ObtenerDistanciasDesde(string cedula)
+        public ListaEnlazada<(string cedula, double distancia)> ObtenerDistanciasDesde(string cedula)
         {
-            if (distancias.ContainsKey(cedula))
-                return new Dictionary<string, double>(distancias[cedula]);
-            return new Dictionary<string, double>();
+            var resultado = new ListaEnlazada<(string, double)>();
+            
+            for (int i = 0; i < distancias.Largo(); i++)
+            {
+                var dist = distancias.Obtener(i);
+                if (dist.Cedula1 == cedula)
+                {
+                    resultado.AgregarFinal((dist.Cedula2, dist.Distancia));
+                }
+                else if (dist.Cedula2 == cedula)
+                {
+                    resultado.AgregarFinal((dist.Cedula1, dist.Distancia));
+                }
+            }
+            
+            return resultado;
         }
 
         // Obtiene todos los nodos
-        public List<NodoGrafo> ObtenerTodosNodos()
+        public ListaEnlazada<NodoGrafo> ObtenerTodosNodos()
         {
-            return new List<NodoGrafo>(nodos.Values);
+            return nodos;
         }
 
         // Recalcula TODAS las distancias (llamar después de agregar nodos)
         public void RecalcularTodasDistancias()
         {
-            var listaNodos = new List<string>(nodos.Keys);
+            distancias = new ListaEnlazada<DistanciaEntreNodos>(); // Limpiar distancias anteriores
 
-            for (int i = 0; i < listaNodos.Count; i++)
+            for (int i = 0; i < nodos.Largo(); i++)
             {
-                for (int j = i + 1; j < listaNodos.Count; j++)
+                for (int j = i + 1; j < nodos.Largo(); j++)
                 {
-                    CalcularYGuardarDistancia(listaNodos[i], listaNodos[j]);
+                    CalcularYGuardarDistancia(nodos.Obtener(i).Cedula, nodos.Obtener(j).Cedula);
                 }
             }
         }
@@ -119,22 +201,20 @@
         public (string cedula1, string cedula2, double distancia) ObtenerParMasLejano()
         {
             // Validación
-            if (nodos.Count < 2)
+            if (nodos.Largo() < 2)
                 return ("", "", 0);
 
             double maxDistancia = 0;
             string ced1 = "", ced2 = "";
 
-            foreach (var kvp1 in distancias)
+            for (int i = 0; i < distancias.Largo(); i++)
             {
-                foreach (var kvp2 in kvp1.Value)
+                var dist = distancias.Obtener(i);
+                if (dist.Distancia > maxDistancia)
                 {
-                    if (kvp2.Value > maxDistancia)
-                    {
-                        maxDistancia = kvp2.Value;
-                        ced1 = kvp1.Key;
-                        ced2 = kvp2.Key;
-                    }
+                    maxDistancia = dist.Distancia;
+                    ced1 = dist.Cedula1;
+                    ced2 = dist.Cedula2;
                 }
             }
 
@@ -144,22 +224,20 @@
         public (string cedula1, string cedula2, double distancia) ObtenerParMasCercano()
         {
             // Validación
-            if (nodos.Count < 2)
+            if (nodos.Largo() < 2)
                 return ("", "", 0);
 
             double minDistancia = double.MaxValue;
             string ced1 = "", ced2 = "";
 
-            foreach (var kvp1 in distancias)
+            for (int i = 0; i < distancias.Largo(); i++)
             {
-                foreach (var kvp2 in kvp1.Value)
+                var dist = distancias.Obtener(i);
+                if (dist.Distancia < minDistancia && dist.Distancia > 0)
                 {
-                    if (kvp2.Value < minDistancia && kvp2.Value > 0)
-                    {
-                        minDistancia = kvp2.Value;
-                        ced1 = kvp1.Key;
-                        ced2 = kvp2.Key;
-                    }
+                    minDistancia = dist.Distancia;
+                    ced1 = dist.Cedula1;
+                    ced2 = dist.Cedula2;
                 }
             }
 
@@ -168,19 +246,96 @@
 
         public double ObtenerDistanciaPromedio()
         {
-            double suma = 0;
-            int contador = 0;
+            if (distancias.Largo() == 0)
+                return 0;
 
-            foreach (var kvp1 in distancias)
+            double suma = 0;
+            int contador = distancias.Largo();
+
+            for (int i = 0; i < contador; i++)
             {
-                foreach (var kvp2 in kvp1.Value)
-                {
-                    suma += kvp2.Value;
-                    contador++;
-                }
+                suma += distancias.Obtener(i).Distancia;
             }
 
             return contador > 0 ? suma / contador : 0;
+        }
+
+        // MÉTODOS DE RECORRIDO
+        // Recorrido en amplitud (BFS) desde un nodo
+        public ListaEnlazada<NodoGrafo> RecorridoBFS(string cedulaInicio)
+        {
+            var resultado = new ListaEnlazada<NodoGrafo>();
+            var nodoInicio = BuscarNodo(cedulaInicio);
+
+            if (nodoInicio == null)
+                return resultado;
+
+            var visitados = new ListaEnlazada<string>();
+            var cola = new Cola<NodoGrafo>();
+
+            cola.Encolar(nodoInicio);
+            visitados.AgregarFinal(nodoInicio.Cedula);
+
+            while (!cola.EstaVacia())
+            {
+                var nodoActual = cola.Desencolar();
+                resultado.AgregarFinal(nodoActual);
+
+                // Agregar nodos vecinos a la cola
+                // En un grafo completo de residencias, todos están conectados
+                for (int i = 0; i < nodos.Largo(); i++)
+                {
+                    var vecino = nodos.Obtener(i);
+                    if (!visitados.Contiene(vecino.Cedula))
+                    {
+                        visitados.AgregarFinal(vecino.Cedula);
+                        cola.Encolar(vecino);
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
+        // Recorrido en profundidad (DFS) desde un nodo
+        public ListaEnlazada<NodoGrafo> RecorridoDFS(string cedulaInicio)
+        {
+            var resultado = new ListaEnlazada<NodoGrafo>();
+            var visitados = new ListaEnlazada<string>();
+            var nodoInicio = BuscarNodo(cedulaInicio);
+
+            if (nodoInicio == null)
+                return resultado;
+
+            RecorridoDFSRecursivo(nodoInicio, visitados, resultado);
+            return resultado;
+        }
+
+        private void RecorridoDFSRecursivo(NodoGrafo nodo, ListaEnlazada<string> visitados, ListaEnlazada<NodoGrafo> resultado)
+        {
+            visitados.AgregarFinal(nodo.Cedula);
+            resultado.AgregarFinal(nodo);
+
+            // Visitar nodos no visitados
+            for (int i = 0; i < nodos.Largo(); i++)
+            {
+                var vecino = nodos.Obtener(i);
+                if (!visitados.Contiene(vecino.Cedula))
+                {
+                    RecorridoDFSRecursivo(vecino, visitados, resultado);
+                }
+            }
+        }
+
+        // MÉTODOS AUXILIARES
+        public int CantidadNodos()
+        {
+            return nodos.Largo();
+        }
+
+        public bool EstaVacio()
+        {
+            return nodos.Largo() == 0;
         }
     }
 }

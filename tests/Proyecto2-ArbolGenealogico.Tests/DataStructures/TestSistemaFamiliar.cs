@@ -16,7 +16,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             Assert.NotNull(sistema.Arbol);
             Assert.NotNull(sistema.Grafo);
             Assert.False(sistema.Arbol.TieneRaiz());
-            Assert.Empty(sistema.Grafo.ObtenerTodosNodos());
+            Assert.Equal(0, sistema.Grafo.ObtenerTodosNodos().Largo());
         }
 
         // ========== TESTS DE AGREGAR MIEMBROS ==========
@@ -31,7 +31,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
 
             Assert.True(resultado);
             Assert.True(sistema.Arbol.TieneRaiz());
-            Assert.Single(sistema.Grafo.ObtenerTodosNodos());
+            Assert.Equal(1, sistema.Grafo.ObtenerTodosNodos().Largo());
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             bool resultado = sistema.AgregarMiembroCompleto("Padre", hijo);
 
             Assert.True(resultado);
-            Assert.Equal(2, sistema.Grafo.ObtenerTodosNodos().Count);
+            Assert.Equal(2, sistema.Grafo.ObtenerTodosNodos().Largo());
             Assert.NotNull(sistema.Arbol.BuscarPorNombre("Hijo"));
         }
 
@@ -60,7 +60,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             bool resultado = sistema.AgregarMiembroCompleto("PadreInexistente", hijo);
 
             Assert.False(resultado);
-            Assert.Single(sistema.Grafo.ObtenerTodosNodos()); // Solo la raíz
+            Assert.Equal(1, sistema.Grafo.ObtenerTodosNodos().Largo()); // Solo la raíz
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             sistema.AgregarMiembroCompleto("Abuelo", padre);
             sistema.AgregarMiembroCompleto("Padre", hijo);
 
-            Assert.Equal(3, sistema.Grafo.ObtenerTodosNodos().Count);
+            Assert.Equal(3, sistema.Grafo.ObtenerTodosNodos().Largo());
             Assert.NotNull(sistema.BuscarPorNombre("Hijo"));
         }
 
@@ -255,7 +255,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
             Assert.NotNull(sistema.BuscarPorNombre("Hijo"));
 
             // Verificar grafo
-            Assert.Equal(3, sistema.Grafo.ObtenerTodosNodos().Count);
+            Assert.Equal(3, sistema.Grafo.ObtenerTodosNodos().Largo());
             Assert.True(sistema.Grafo.ObtenerDistancia("111", "222") > 0);
 
             // Verificar estadísticas
@@ -283,7 +283,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.DataStructures
                 new NodoFamiliar("Gen3B", "5", "01/01/2003", 22, "f5.jpg", 9.0, -83.0));
 
             // Verificar estructura
-            Assert.Equal(5, sistema.Grafo.ObtenerTodosNodos().Count);
+            Assert.Equal(5, sistema.Grafo.ObtenerTodosNodos().Largo());
             Assert.True(sistema.ObtenerDistanciaPromedio() > 0);
 
             var (_, _, distMax) = sistema.ParMasLejano();
