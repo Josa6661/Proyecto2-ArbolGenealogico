@@ -450,7 +450,18 @@ namespace Proyecto2_ArbolGenealogico
                 chkEsPadreDeRaiz.IsChecked = false; // Desmarcar el checkbox
                 ActualizarListaPadres(); // Actualizar listas de padres y cónyuges disponibles
                 arbolView.DibujarArbol(sistema.Arbol);
+                ActualizarMapa(); // Actualizar mapa con nuevos marcadores
                 LimpiarCampos();
+            }
+        }
+
+        // Actualizar marcadores en el mapa
+        private void ActualizarMapa()
+        {
+            if (sistema.Arbol.TieneRaiz())
+            {
+                sistema.Grafo.ConstruirDesdeArbol(sistema.Arbol);
+                mapaService.MostrarFamiliaresEnMapa(sistema.Grafo);
             }
         }
 
@@ -552,6 +563,7 @@ namespace Proyecto2_ArbolGenealogico
                 
                 ActualizarListaPadres();
                 arbolView.DibujarArbol(sistema.Arbol);
+                ActualizarMapa(); // Actualizar mapa después de eliminar
                 cmbEliminar.SelectedIndex = -1;
                 cmbEliminar.Text = "";
             }
