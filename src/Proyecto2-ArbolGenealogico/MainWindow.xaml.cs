@@ -22,8 +22,11 @@ namespace Proyecto2_ArbolGenealogico
             mapaService = new MapaService(MapaResidencias);
             mapaService.ConfigurarOverlayCanvas(CanvasOverlayMapa);
             
-            chkEsPadreDeRaiz.Visibility = Visibility.Collapsed; // Ocultar inicialmente
-            cmbConyuge.Visibility = Visibility.Collapsed; // Ocultar inicialmente
+            lblPadre.Visibility = Visibility.Collapsed; // Ocultar inicialmente
+            cmbPadre.Visibility = Visibility.Collapsed;
+            chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
+            lblConyuge.Visibility = Visibility.Collapsed;
+            cmbConyuge.Visibility = Visibility.Collapsed;
             
             ActualizarListaPadres();
             mapaService.ConfigurarMapa();
@@ -64,7 +67,7 @@ namespace Proyecto2_ArbolGenealogico
                     var f1 = lista.Obtener(i);
                     var f2 = lista.Obtener(j);
 
-                    // Usamos la función Haversine de tu MapaService
+                    // Se usa Haversine para calcular distancia
                     double d = MapaService.CalcularDistanciaHaversine(
                         f1.Latitud, f1.Longitud,
                         f2.Latitud, f2.Longitud
@@ -113,18 +116,24 @@ namespace Proyecto2_ArbolGenealogico
                 for (int i = 0; i < nodosJerarquicos.Largo(); i++)
                 {
                     var miembro = nodosJerarquicos.Obtener(i);
-                    // Agregar el nombre completo (se puede personalizar con más info)
+                    // Agregar el nombre completo
                     cmbPadre.Items.Add(miembro.Nombre);
                 }
                 
                 // Mostrar los controles solo cuando hay una raíz
+                lblPadre.Visibility = Visibility.Visible;
+                cmbPadre.Visibility = Visibility.Visible;
                 chkEsPadreDeRaiz.Visibility = Visibility.Visible;
+                lblConyuge.Visibility = Visibility.Visible;
                 cmbConyuge.Visibility = Visibility.Visible;
             }
             else
             {
                 // Ocultar los controles si no hay raíz
+                lblPadre.Visibility = Visibility.Collapsed;
+                cmbPadre.Visibility = Visibility.Collapsed;
                 chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
+                lblConyuge.Visibility = Visibility.Collapsed;
                 cmbConyuge.Visibility = Visibility.Collapsed;
             }
 
@@ -154,7 +163,7 @@ namespace Proyecto2_ArbolGenealogico
                 for (int i = 0; i < todosLosMiembros.Largo(); i++)
                 {
                     var miembro = todosLosMiembros.Obtener(i);
-                    // Solo agregar miembros que NO tengan cónyuge
+                    // Solo agregar miembros que no tengan cónyuge
                     if (miembro.Conyuge == null)
                     {
                         cmbConyuge.Items.Add(miembro.Nombre);
@@ -536,6 +545,11 @@ namespace Proyecto2_ArbolGenealogico
             {
                 sistema.Grafo.ConstruirDesdeArbol(sistema.Arbol);
                 mapaService.MostrarFamiliaresEnMapa(sistema.Grafo);
+            }
+            else
+            {
+                // Si no hay raíz, limpiar el mapa completamente
+                mapaService.LimpiarMapaCompleto();
             }
         }
 

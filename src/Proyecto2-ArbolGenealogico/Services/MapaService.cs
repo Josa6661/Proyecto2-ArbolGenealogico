@@ -576,5 +576,21 @@ namespace Proyecto2_ArbolGenealogico.Services
             }
             mapControl.Refresh();
         }
+
+        // Limpiar completamente el mapa y el overlay
+        public void LimpiarMapaCompleto()
+        {
+            // Primero poner en null para detener actualizaciones
+            grafoActual = null;
+            nodoSeleccionado = null;
+            
+            // Luego limpiar marcadores y canvas
+            LimpiarMarcadores();
+            
+            if (overlayCanvas != null)
+            {
+                overlayCanvas.Children.Clear();
+            }
+        }
     }
 }

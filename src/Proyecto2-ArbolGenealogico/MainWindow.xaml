@@ -68,7 +68,7 @@
                              ToolTip="Ejemplo: -84.0907"/>
 
                     <!-- Padre (opcional) -->
-                    <TextBlock Text="Seleccionar Padre (opcional)" Foreground="White" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="lblPadre" Text="Seleccionar Padre (opcional)" Foreground="White" FontWeight="SemiBold"/>
                     <ComboBox x:Name="cmbPadre" 
                               Background="#1E2F4C" 
                               Foreground="Blue" 
@@ -88,7 +88,7 @@
                               ToolTip="Marca esta opción si quieres agregar un ancestro al nodo raíz actual"/>
 
                     <!-- Cónyuge (opcional) -->
-                    <TextBlock Text="Seleccionar Cónyuge (opcional)" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="lblConyuge" Text="Seleccionar Cónyuge (opcional)" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
                     <ComboBox x:Name="cmbConyuge" 
                               Background="#1E2F4C" 
                               Foreground="#81C784" 
