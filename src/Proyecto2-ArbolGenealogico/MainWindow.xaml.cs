@@ -28,7 +28,79 @@ namespace Proyecto2_ArbolGenealogico
             ActualizarListaPadres();
             mapaService.ConfigurarMapa();
         }
+        private void ActualizarEstadisticas_Click(object sender, RoutedEventArgs e)
+        {
+            if (!sistema.Arbol.TieneRaiz())
+            {
+                txtLejos.Text = "No hay familiares suficientes.";
+                txtCerca.Text = "";
+                txtPromedio.Text = "";
+                return;
+            }
 
+            var lista = sistema.Arbol.ObtenerTodos();
+            int n = lista.Largo();
+
+            if (n < 2)
+            {
+                txtLejos.Text = "Se necesitan al menos 2 familiares.";
+                txtCerca.Text = "";
+                txtPromedio.Text = "";
+                return;
+            }
+
+            double maxDist = -1;
+            double minDist = double.MaxValue;
+            double sumaDist = 0;
+            int conteo = 0;
+
+            NodoFamiliar lejosA = null, lejosB = null;
+            NodoFamiliar cercaA = null, cercaB = null;
+
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    var f1 = lista.Obtener(i);
+                    var f2 = lista.Obtener(j);
+
+                    // Usamos la función Haversine de tu MapaService
+                    double d = MapaService.CalcularDistanciaHaversine(
+                        f1.Latitud, f1.Longitud,
+                        f2.Latitud, f2.Longitud
+                    );
+
+                    sumaDist += d;
+                    conteo++;
+
+                    if (d > maxDist)
+                    {
+                        maxDist = d;
+                        lejosA = f1;
+                        lejosB = f2;
+                    }
+
+                    if (d < minDist)
+                    {
+                        minDist = d;
+                        cercaA = f1;
+                        cercaB = f2;
+                    }
+                }
+            }
+
+            double promedio = sumaDist / conteo;
+
+            // Imprimir resultados
+            txtLejos.Text =
+                $"Par más lejos:\n{lejosA.Nombre} ↔ {lejosB.Nombre}\nDistancia: {maxDist:F2} km";
+
+            txtCerca.Text =
+                $"Par más cerca:\n{cercaA.Nombre} ↔ {cercaB.Nombre}\nDistancia: {minDist:F2} km";
+
+            txtPromedio.Text =
+                $"Distancia promedio entre familiares:\n{promedio:F2} km";
+        }
         // Actualiza la lista de padres disponibles en el ComboBox
         private void ActualizarListaPadres()
         {
@@ -452,6 +524,7 @@ namespace Proyecto2_ArbolGenealogico
                 ActualizarListaPadres(); // Actualizar listas de padres y cónyuges disponibles
                 arbolView.DibujarArbol(sistema.Arbol);
                 ActualizarMapa(); // Actualizar mapa con nuevos marcadores
+                ActualizarEstadisticas_Click(null, null);
                 LimpiarCampos();
             }
         }
@@ -565,6 +638,7 @@ namespace Proyecto2_ArbolGenealogico
                 ActualizarListaPadres();
                 arbolView.DibujarArbol(sistema.Arbol);
                 ActualizarMapa(); // Actualizar mapa después de eliminar
+                ActualizarEstadisticas_Click(null, null);
                 cmbEliminar.SelectedIndex = -1;
                 cmbEliminar.Text = "";
             }
