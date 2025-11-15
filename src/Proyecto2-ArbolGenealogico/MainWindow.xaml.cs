@@ -19,6 +19,7 @@ namespace Proyecto2_ArbolGenealogico
             InitializeComponent();
             sistema = new SistemaFamiliar();
             arbolView = new ArbolView(ArbolCanvas);
+            arbolView.OnNodoClick = CargarDatosNodoEnFormulario;
             mapaService = new MapaService(MapaResidencias);
             mapaService.ConfigurarOverlayCanvas(CanvasOverlayMapa);
             
@@ -30,6 +31,17 @@ namespace Proyecto2_ArbolGenealogico
             
             ActualizarListaPadres();
             mapaService.ConfigurarMapa();
+        }
+
+        private void CargarDatosNodoEnFormulario(NodoFamiliar nodo)
+        {
+            var ventanaEditar = new EditarNodoWindow(nodo);
+            if (ventanaEditar.ShowDialog() == true)
+            {
+                arbolView.DibujarArbol(sistema.Arbol);
+                ActualizarMapa();
+                ActualizarListaPadres();
+            }
         }
         private void ActualizarEstadisticas_Click(object sender, RoutedEventArgs e)
         {

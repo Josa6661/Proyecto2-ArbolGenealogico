@@ -14,6 +14,7 @@ namespace Proyecto2_ArbolGenealogico.Views
         private readonly double nodoAlto;
         private readonly double espacioHorizontal;
         private readonly double espacioVertical;
+        public Action<NodoFamiliar> OnNodoClick;
 
         public ArbolView(Canvas canvas, double nodoAncho = 120, double nodoAlto = 100, 
             double espacioHorizontal = 80, double espacioVertical = 140)
@@ -88,6 +89,7 @@ namespace Proyecto2_ArbolGenealogico.Views
                     Stroke = new SolidColorBrush(Color.FromRgb(129, 199, 132)), // Verde para cónyuge
                     StrokeThickness = 2
                 };
+                
                 TextBlock textoConyuge = new TextBlock
                 {
                     Text = persona.Conyuge.Nombre,
@@ -96,8 +98,11 @@ namespace Proyecto2_ArbolGenealogico.Views
                     TextAlignment = TextAlignment.Center,
                     Width = nodoAncho - 10,
                     TextWrapping = TextWrapping.Wrap,
-                    Padding = new Thickness(5)
+                    Padding = new Thickness(5),
+                    Tag = persona.Conyuge,
+                    Cursor = System.Windows.Input.Cursors.Hand
                 };
+                textoConyuge.MouseLeftButtonDown += (s, e) => OnNodoClick?.Invoke(persona.Conyuge);
 
                 // Medir el texto para centrarlo verticalmente
                 textoConyuge.Measure(new Size(nodoAncho - 10, nodoAlto - 10));
@@ -132,6 +137,7 @@ namespace Proyecto2_ArbolGenealogico.Views
                 Stroke = new SolidColorBrush(Color.FromRgb(100, 181, 246)),
                 StrokeThickness = 2
             };
+            
             TextBlock texto = new TextBlock
             {
                 Text = persona.Nombre,
@@ -140,8 +146,11 @@ namespace Proyecto2_ArbolGenealogico.Views
                 TextAlignment = TextAlignment.Center,
                 Width = nodoAncho - 10,
                 TextWrapping = TextWrapping.Wrap,
-                Padding = new Thickness(5)
+                Padding = new Thickness(5),
+                Tag = persona,
+                Cursor = System.Windows.Input.Cursors.Hand
             };
+            texto.MouseLeftButtonDown += (s, e) => OnNodoClick?.Invoke(persona);
 
             // Medir el texto para centrarlo verticalmente
             texto.Measure(new Size(nodoAncho - 10, nodoAlto - 10));
