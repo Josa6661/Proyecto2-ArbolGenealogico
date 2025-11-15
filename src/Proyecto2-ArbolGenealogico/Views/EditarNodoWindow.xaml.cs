@@ -1,4 +1,5 @@
 using Proyecto2_ArbolGenealogico.DataStructures;
+using Proyecto2_ArbolGenealogico.Helpers;
 using System;
 using System.Windows;
 
@@ -25,6 +26,12 @@ namespace Proyecto2_ArbolGenealogico.Views
             txtFotoRuta.Text = nodo.FotoRuta ?? "";
             txtLatitud.Text = nodo.Latitud.ToString();
             txtLongitud.Text = nodo.Longitud.ToString();
+
+            // Si es un nodo "Desconocido", permitir editar la cédula
+            if (nodo.Cedula.StartsWith("DESCONOCIDO-"))
+            {
+                txtCedula.IsReadOnly = false;
+            }
         }
 
         private void ExplorarFoto_Click(object sender, RoutedEventArgs e)
@@ -44,39 +51,70 @@ namespace Proyecto2_ArbolGenealogico.Views
 
         private void Guardar_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtNombre.Text) ||
-                string.IsNullOrWhiteSpace(txtFechaNacimiento.Text) ||
-                string.IsNullOrWhiteSpace(txtEdad.Text) ||
-                string.IsNullOrWhiteSpace(txtLatitud.Text) ||
-                string.IsNullOrWhiteSpace(txtLongitud.Text))
+            string nombre = txtNombre.Text.Trim();
+            string cedula = txtCedula.Text.Trim();
+            string fechaNacimiento = txtFechaNacimiento.Text.Trim();
+            string edadTexto = txtEdad.Text.Trim();
+            string latitudTexto = txtLatitud.Text.Trim();
+            string longitudTexto = txtLongitud.Text.Trim();
+
+            if (!ValidacionHelper.ValidarCamposRequeridos(nombre, cedula, fechaNacimiento, edadTexto, latitudTexto, longitudTexto, out string mensajeCampos))
             {
-                MessageBox.Show("Por favor completa todos los campos obligatorios (*)", 
-                    "Campos Requeridos", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(mensajeCampos, "Campo Requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!int.TryParse(txtEdad.Text, out int edad) || edad < 0)
+            if (!ValidacionHelper.ValidarCedula(cedula, out string mensajeCedula))
             {
-                MessageBox.Show("La edad debe ser un número válido.", 
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(mensajeCedula, "Cédula Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!double.TryParse(txtLatitud.Text, out double latitud) || latitud < -90 || latitud > 90)
+            if (!ValidacionHelper.ValidarFecha(fechaNacimiento, out DateTime fechaNac))
             {
-                MessageBox.Show("La latitud debe estar entre -90 y 90.", 
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).", 
+                    "Fecha Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!double.TryParse(txtLongitud.Text, out double longitud) || longitud < -180 || longitud > 180)
+            if (!int.TryParse(edadTexto, out int edad) || edad < 0 || edad > 150)
             {
-                MessageBox.Show("La longitud debe estar entre -180 y 180.", 
-                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Por favor, ingresa una edad válida (0-150).", "Edad Inválida", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
+            }
+
+            if (!ValidacionHelper.ValidarEdad(fechaNac, edad, out string mensajeEdad))
+            {
+                MessageBox.Show(mensajeEdad, "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!ValidacionHelper.ValidarCoordenadas(latitudTexto, longitudTexto, out double latitud, out double longitud, out string mensajeCoordenadas))
+            {
+                MessageBox.Show(mensajeCoordenadas, "Coordenada Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validar diferencia de edad con hijos si tiene
+            if (nodo.Hijos.Largo() > 0)
+            {
+                for (int i = 0; i < nodo.Hijos.Largo(); i++)
+                {
+                    var hijo = nodo.Hijos.Obtener(i);
+                    int diferenciaEdad = edad - hijo.Edad;
+                    if (diferenciaEdad < 10)
+                    {
+                        MessageBox.Show($"La edad del padre/madre debe ser al menos 10 años mayor que la del hijo.\n" +
+                            $"Diferencia actual con {hijo.Nombre}: {diferenciaEdad} años.", 
+                            "Validación de Edad", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
             }
 
             nodo.Nombre = txtNombre.Text.Trim();
+            nodo.Cedula = txtCedula.Text.Trim();
             nodo.FechaNacimiento = txtFechaNacimiento.Text.Trim();
             nodo.Edad = edad;
             nodo.FotoRuta = string.IsNullOrWhiteSpace(txtFotoRuta.Text) ? null : txtFotoRuta.Text.Trim();

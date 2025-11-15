@@ -20,7 +20,7 @@
                 <TextBox x:Name="txtNombre" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
                 <TextBlock Text="Cédula *" Foreground="White" FontWeight="SemiBold"/>
-                <TextBox x:Name="txtCedula" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White" IsReadOnly="True"/>
+                <TextBox x:Name="txtCedula" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>
 
                 <TextBlock Text="Fecha de Nacimiento (dd/MM/yyyy) *" Foreground="White" FontWeight="SemiBold"/>
                 <TextBox x:Name="txtFechaNacimiento" Margin="0,5,0,10" Background="#1E2F4C" Foreground="White"/>

@@ -314,7 +314,8 @@ namespace Proyecto2_ArbolGenealogico.Services
             // Guardar referencia al grafo actual para mostrar distancias
             grafoActual = grafo;
 
-            // Limpiar canvas overlay
+            // Limpiar marcadores y canvas overlay
+            LimpiarMarcadores();
             overlayCanvas.Children.Clear();
 
             // Verificar que el viewport esté inicializado
@@ -327,11 +328,15 @@ namespace Proyecto2_ArbolGenealogico.Services
                 // Esperar a que el viewport se inicialice
                 mapControl.Loaded += (s, e) => 
                 {
-                    var nodos = grafo.ObtenerTodosNodos();
-                    for (int i = 0; i < nodos.Largo(); i++)
+                    // Solo agregar si este grafo sigue siendo el actual
+                    if (grafoActual == grafo)
                     {
-                        var nodo = nodos.Obtener(i);
-                        AgregarMarcadorEnCanvas(nodo);
+                        var nodos = grafo.ObtenerTodosNodos();
+                        for (int i = 0; i < nodos.Largo(); i++)
+                        {
+                            var nodo = nodos.Obtener(i);
+                            AgregarMarcadorEnCanvas(nodo);
+                        }
                     }
                 };
                 return;
@@ -453,8 +458,18 @@ namespace Proyecto2_ArbolGenealogico.Services
         // Actualizar posiciones de marcadores cuando se navega el mapa
         private void ActualizarPosicionesCanvas()
         {
-            if (overlayCanvas == null || grafoActual == null)
+            if (overlayCanvas == null)
                 return;
+
+            // Si no hay grafo actual, asegurar que el canvas esté vacío
+            if (grafoActual == null)
+            {
+                if (overlayCanvas.Children.Count > 0)
+                {
+                    overlayCanvas.Children.Clear();
+                }
+                return;
+            }
 
             // Validar que el viewport esté inicializado
             if (mapControl.Map?.Navigator?.Viewport == null)

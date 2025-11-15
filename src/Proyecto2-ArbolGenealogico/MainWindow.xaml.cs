@@ -556,11 +556,12 @@ namespace Proyecto2_ArbolGenealogico
             if (sistema.Arbol.TieneRaiz())
             {
                 sistema.Grafo.ConstruirDesdeArbol(sistema.Arbol);
+                mapaService.LimpiarMapaCompleto();
                 mapaService.MostrarFamiliaresEnMapa(sistema.Grafo);
             }
             else
             {
-                // Si no hay raíz, limpiar el mapa completamente
+                // Si no hay raíz, solo limpiar
                 mapaService.LimpiarMapaCompleto();
             }
         }
@@ -587,8 +588,8 @@ namespace Proyecto2_ArbolGenealogico
             LimpiarCampos();
         }
 
-        // Botón eliminar miembro
-        private void Eliminar_Click(object sender, RoutedEventArgs e)
+        // Botón eliminar miembro con descendencia
+        private void EliminarConDescendencia_Click(object sender, RoutedEventArgs e)
         {
             string nombreEliminar = cmbEliminar.Text.Trim();
 
@@ -673,6 +674,100 @@ namespace Proyecto2_ArbolGenealogico
                 MessageBox.Show($"No se pudo eliminar a '{nombreEliminar}'.", 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // Botón marcar como desconocido
+        private void MarcarDesconocido_Click(object sender, RoutedEventArgs e)
+        {
+            string nombreEliminar = cmbEliminar.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(nombreEliminar) || nombreEliminar == "(Sin miembros en el árbol)")
+            {
+                MessageBox.Show("Por favor, selecciona un miembro para marcar como desconocido.", 
+                    "Selección Requerida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Confirmar acción
+            var result = MessageBox.Show($"¿Estás seguro de que deseas marcar a '{nombreEliminar}' como 'Desconocido'?\n" +
+                "Este nodo mantendrá su descendencia y podrá ser editado después.", 
+                "Confirmar Acción", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.No)
+                return;
+
+            // Buscar el miembro
+            var miembro = sistema.Arbol.BuscarPorNombre(nombreEliminar);
+            if (miembro == null)
+            {
+                MessageBox.Show($"No se encontró el miembro '{nombreEliminar}'.", 
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Verificar que esté en la jerarquía
+            var nodosJerarquicos = sistema.Arbol.ObtenerNodosJerarquicos();
+            bool estaEnJerarquia = false;
+            for (int i = 0; i < nodosJerarquicos.Largo(); i++)
+            {
+                if (nodosJerarquicos.Obtener(i).Cedula == miembro.Cedula)
+                {
+                    estaEnJerarquia = true;
+                    break;
+                }
+            }
+
+            if (!estaEnJerarquia)
+            {
+                MessageBox.Show("Solo se pueden marcar como desconocidos los nodos de la jerarquía principal.", 
+                    "Acción no Permitida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Calcular edad mínima basada en hijos si tiene
+            int edadMinima = 0;
+            if (miembro.Hijos.Largo() > 0)
+            {
+                for (int i = 0; i < miembro.Hijos.Largo(); i++)
+                {
+                    var hijo = miembro.Hijos.Obtener(i);
+                    int edadNecesaria = hijo.Edad + 10; // Mínimo 10 años de diferencia
+                    if (edadNecesaria > edadMinima)
+                        edadMinima = edadNecesaria;
+                }
+            }
+
+            // Convertir el nodo en "Desconocido"
+            miembro.Nombre = "Desconocido";
+            miembro.Cedula = "000";
+            
+            // Si tiene hijos, calcular fecha/edad apropiada
+            if (edadMinima > 0)
+            {
+                miembro.Edad = edadMinima;
+                DateTime fechaAproximada = DateTime.Now.AddYears(-edadMinima);
+                miembro.FechaNacimiento = fechaAproximada.ToString("dd/MM/yyyy");
+            }
+            else
+            {
+                miembro.FechaNacimiento = "01/01/1900";
+                miembro.Edad = DateTime.Now.Year - 1900;
+            }
+            
+            miembro.FotoRuta = null;
+            miembro.Latitud = 0;
+            miembro.Longitud = 0;
+
+            MessageBox.Show($"'{nombreEliminar}' ha sido marcado como 'Desconocido'.\n" +
+                "Puedes hacer clic en el nodo para editar su información.", 
+                "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            ActualizarListaPadres();
+            arbolView.DibujarArbol(sistema.Arbol);
+            ActualizarMapa();
+            ActualizarEstadisticas_Click(null, null);
+            cmbEliminar.SelectedIndex = -1;
+            cmbEliminar.Text = "";
         }
 
         private void LimpiarCampos()
