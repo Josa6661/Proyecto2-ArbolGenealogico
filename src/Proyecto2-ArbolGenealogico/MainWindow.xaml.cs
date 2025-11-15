@@ -74,16 +74,25 @@ namespace Proyecto2_ArbolGenealogico
 
             for (int i = 0; i < n; i++)
             {
+                var f1 = lista.Obtener(i);
+
+                if (double.IsNaN(f1.Latitud) || double.IsNaN(f1.Longitud))
+                    continue; // Ignorar nodos desconocidos
+
                 for (int j = i + 1; j < n; j++)
                 {
-                    var f1 = lista.Obtener(i);
                     var f2 = lista.Obtener(j);
 
-                    // Se usa Haversine para calcular distancia
+                    if (double.IsNaN(f2.Latitud) || double.IsNaN(f2.Longitud))
+                        continue;
+
                     double d = MapaService.CalcularDistanciaHaversine(
                         f1.Latitud, f1.Longitud,
                         f2.Latitud, f2.Longitud
                     );
+
+                    if (double.IsNaN(d) || double.IsInfinity(d))
+                        continue; 
 
                     sumaDist += d;
                     conteo++;
@@ -104,7 +113,16 @@ namespace Proyecto2_ArbolGenealogico
                 }
             }
 
-            double promedio = sumaDist / conteo;
+            double promedio = conteo > 0 ? sumaDist / conteo : 0;
+
+           // Si no hubo pares válidos
+            if (conteo == 0)
+            {
+                txtLejos.Text = "No hay suficientes familiares con coordenadas válidas.";
+                txtCerca.Text = "";
+                txtPromedio.Text = "Distancia promedio: 0 km";
+                return;
+            }
 
             // Imprimir resultados
             txtLejos.Text =
@@ -755,8 +773,8 @@ namespace Proyecto2_ArbolGenealogico
             }
             
             miembro.FotoRuta = null;
-            miembro.Latitud = 0;
-            miembro.Longitud = 0;
+            miembro.Latitud = double.NaN;
+            miembro.Longitud = double.NaN;
 
             MessageBox.Show($"'{nombreEliminar}' ha sido marcado como 'Desconocido'.\n" +
                 "Puedes hacer clic en el nodo para editar su información.", 
