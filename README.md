@@ -98,8 +98,8 @@ Proyecto2-ArbolGenealogico/
 Para documentación completa y detallada, visita nuestra [**Wiki**](../../wiki):
 
 - [📐 Arquitectura y Diseño](https://github.com/Josa6661/Proyecto2-ArbolGenealogico/wiki/Diagrama-del-Sistema) - Diagramas UML y estructura del sistema
-- [🎓 Aprendizajes]([../../wiki/Aprendizajes](https://github.com/Josa6661/Proyecto2-ArbolGenealogico/wiki/Aprendizajes)) - Reflexiones técnicas y de equipo
-- [📖 Manual de Usuario](../../wiki/Manual-de-Usuario) - Guía paso a paso 
+- [🎓 Aprendizajes](https://github.com/Josa6661/Proyecto2-ArbolGenealogico/wiki/Aprendizajes) - Reflexiones técnicas y de equipo
+- [📖 Manual de Usuario] - Guía paso a paso(por agregar) 
 
 ---
 
