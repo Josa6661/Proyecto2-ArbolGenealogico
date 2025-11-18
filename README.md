@@ -97,9 +97,9 @@ Proyecto2-ArbolGenealogico/
 
 Para documentación completa y detallada, visita nuestra [**Wiki**](../../wiki):
 
-- [📐 Arquitectura y Diseño](../../wiki/Arquitectura-y-Diseño) - Diagramas UML y estructura del sistema
-- [🎓 Aprendizajes](../../wiki/Aprendizajes) - Reflexiones técnicas y de equipo
-- [📖 Manual de Usuario](../../wiki/Manual-de-Usuario) - Guía paso a paso con capturas
+- [📐 Arquitectura y Diseño](../../wiki/Arquitectura-y-Diseño (https://github.com/Josa6661/Proyecto2-ArbolGenealogico/wiki/Diagrama-del-Sistema)) - Diagramas UML y estructura del sistema
+- [🎓 Aprendizajes]([../../wiki/Aprendizajes](https://github.com/Josa6661/Proyecto2-ArbolGenealogico/wiki/Aprendizajes)) - Reflexiones técnicas y de equipo
+- [📖 Manual de Usuario](../../wiki/Manual-de-Usuario) - Guía paso a paso 
 
 ---
 
@@ -108,19 +108,6 @@ Para documentación completa y detallada, visita nuestra [**Wiki**](../../wiki):
 - **[Nombre Estudiante 1]** - [@usuario1](https://github.com/usuario1)
 - **[Nombre Estudiante 2]** - [@usuario2](https://github.com/usuario2)
 - **[Ricky Wu Yan]** - [@RckyWu](https://github.com/RckyWu)
-
----
-
-## 📸 Capturas de Pantalla
-
-### Árbol Genealógico
-![Árbol Genealógico](assets/screenshots/arbol.png)
-
-### Mapa de Residencias
-![Mapa](assets/screenshots/mapa.png)
-
-### Estadísticas
-![Estadísticas](assets/screenshots/estadisticas.png)
 
 ---
 
