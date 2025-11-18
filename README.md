@@ -105,7 +105,7 @@ Para documentación completa y detallada, visita nuestra [**Wiki**](../../wiki):
 
 ## 👥 Equipo de Desarrollo
 
-- **[Nombre Estudiante 1]** - [@cam0107](https://github.com/cam0107)
+- **[Camila Navarro Valverde]** - [@cam0107](https://github.com/cam0107)
 - **[Josafat Solano Quirós]** - [@Josa6661](https://github.com/Josa6661)
 - **[Ricky Wu Yan]** - [@RckyWu](https://github.com/RckyWu)
 
