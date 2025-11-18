@@ -152,6 +152,22 @@ namespace Proyecto2_ArbolGenealogico.Helpers
 
             mensaje = string.Empty;
             return true;
+
+
         }
+        public static bool ValidarDiferenciaEdadConyuges(int edadMiembro, int edadConyuge, int diferenciaMaxima, out string mensaje)
+        {
+            int diferencia = Math.Abs(edadMiembro - edadConyuge);
+
+            if (diferencia > diferenciaMaxima)
+            {
+                mensaje = $"Hay una diferencia de {diferencia} años entre los cónyuges (máximo recomendado: {diferenciaMaxima} años).";
+                return false;
+            }
+
+            mensaje = string.Empty;
+            return true;
+        }
+
     }
 }

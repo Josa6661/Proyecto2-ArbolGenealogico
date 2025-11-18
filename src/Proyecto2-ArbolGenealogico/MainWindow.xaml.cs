@@ -6,6 +6,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
+
 namespace Proyecto2_ArbolGenealogico
 {
     public partial class MainWindow : Window
@@ -57,94 +58,21 @@ namespace Proyecto2_ArbolGenealogico
         }
         private void ActualizarEstadisticas_Click(object sender, RoutedEventArgs e)
         {
-            if (!sistema.Arbol.TieneRaiz())
+            var estadisticas = EstadisticasService.CalcularEstadisticas(sistema.Arbol);
+
+            if (!estadisticas.HayDatosSuficientes)
             {
-                txtLejos.Text = "No hay familiares suficientes.";
+                txtLejos.Text = estadisticas.MensajeError;
                 txtCerca.Text = "";
-                txtPromedio.Text = "";
+                txtPromedio.Text = estadisticas.DistanciaPromedio > 0
+                    ? $"Distancia promedio: {estadisticas.DistanciaPromedio:F2} km"
+                    : "";
                 return;
             }
 
-            var lista = sistema.Arbol.ObtenerTodos();
-            int n = lista.Largo();
-
-            if (n < 2)
-            {
-                txtLejos.Text = "Se necesitan al menos 2 familiares.";
-                txtCerca.Text = "";
-                txtPromedio.Text = "";
-                return;
-            }
-
-            double maxDist = -1;
-            double minDist = double.MaxValue;
-            double sumaDist = 0;
-            int conteo = 0;
-
-            NodoFamiliar lejosA = null, lejosB = null;
-            NodoFamiliar cercaA = null, cercaB = null;
-
-            for (int i = 0; i < n; i++)
-            {
-                var f1 = lista.Obtener(i);
-
-                if (double.IsNaN(f1.Latitud) || double.IsNaN(f1.Longitud))
-                    continue; // Ignorar nodos desconocidos
-
-                for (int j = i + 1; j < n; j++)
-                {
-                    var f2 = lista.Obtener(j);
-
-                    if (double.IsNaN(f2.Latitud) || double.IsNaN(f2.Longitud))
-                        continue;
-
-                    double d = MapaService.CalcularDistanciaHaversine(
-                        f1.Latitud, f1.Longitud,
-                        f2.Latitud, f2.Longitud
-                    );
-
-                    if (double.IsNaN(d) || double.IsInfinity(d))
-                        continue; 
-
-                    sumaDist += d;
-                    conteo++;
-
-                    if (d > maxDist)
-                    {
-                        maxDist = d;
-                        lejosA = f1;
-                        lejosB = f2;
-                    }
-
-                    if (d < minDist)
-                    {
-                        minDist = d;
-                        cercaA = f1;
-                        cercaB = f2;
-                    }
-                }
-            }
-
-            double promedio = conteo > 0 ? sumaDist / conteo : 0;
-
-           // Si no hubo pares válidos
-            if (conteo == 0)
-            {
-                txtLejos.Text = "No hay suficientes familiares con coordenadas válidas.";
-                txtCerca.Text = "";
-                txtPromedio.Text = "Distancia promedio: 0 km";
-                return;
-            }
-
-            // Imprimir resultados
-            txtLejos.Text =
-                $"Par más lejos:\n{lejosA.Nombre} ↔ {lejosB.Nombre}\nDistancia: {maxDist:F2} km";
-
-            txtCerca.Text =
-                $"Par más cerca:\n{cercaA.Nombre} ↔ {cercaB.Nombre}\nDistancia: {minDist:F2} km";
-
-            txtPromedio.Text =
-                $"Distancia promedio entre familiares:\n{promedio:F2} km";
+            txtLejos.Text = $"Par más lejos:\n{estadisticas.ParLejanoA.Nombre} ↔ {estadisticas.ParLejanoB.Nombre}\nDistancia: {estadisticas.DistanciaMaxima:F2} km";
+            txtCerca.Text = $"Par más cerca:\n{estadisticas.ParCercanoA.Nombre} ↔ {estadisticas.ParCercanoB.Nombre}\nDistancia: {estadisticas.DistanciaMinima:F2} km";
+            txtPromedio.Text = $"Distancia promedio entre familiares:\n{estadisticas.DistanciaPromedio:F2} km";
         }
         // Actualiza la lista de padres disponibles en el ComboBox
         private void ActualizarListaPadres()
