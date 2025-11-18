@@ -135,11 +135,3 @@ Este proyecto es de código abierto con fines educativos para el Tecnológico de
 - [OpenStreetMap](https://www.openstreetmap.org/) por los datos cartográficos
 
 ---
-
-## 📧 Contacto
-
-¿Preguntas o problemas? Abre un [Issue](../../issues) o contacta al equipo.
-
----
-
-**Desarrollado con ❤️ por estudiantes del TEC**
