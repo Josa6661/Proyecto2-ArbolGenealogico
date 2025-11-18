@@ -29,8 +29,20 @@ namespace Proyecto2_ArbolGenealogico
             lblConyuge.Visibility = Visibility.Collapsed;
             cmbConyuge.Visibility = Visibility.Collapsed;
             
+            // Ocultar sección de eliminar hasta que se cree el primer miembro
+            lblEliminar.Visibility = Visibility.Collapsed;
+            cmbEliminar.Visibility = Visibility.Collapsed;
+            pnlBotonesEliminar.Visibility = Visibility.Collapsed;
+            
             ActualizarListaPadres();
             mapaService.ConfigurarMapa();
+        }
+
+        private void MostrarInstrucciones_Click(object sender, RoutedEventArgs e)
+        {
+            var ventanaInstrucciones = new InstruccionesWindow();
+            ventanaInstrucciones.Owner = this;
+            ventanaInstrucciones.ShowDialog();
         }
 
         private void CargarDatosNodoEnFormulario(NodoFamiliar nodo)
@@ -156,6 +168,11 @@ namespace Proyecto2_ArbolGenealogico
                 chkEsPadreDeRaiz.Visibility = Visibility.Visible;
                 lblConyuge.Visibility = Visibility.Visible;
                 cmbConyuge.Visibility = Visibility.Visible;
+                
+                // Mostrar también la sección de eliminar
+                lblEliminar.Visibility = Visibility.Visible;
+                cmbEliminar.Visibility = Visibility.Visible;
+                pnlBotonesEliminar.Visibility = Visibility.Visible;
             }
             else
             {
@@ -165,6 +182,11 @@ namespace Proyecto2_ArbolGenealogico
                 chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
                 lblConyuge.Visibility = Visibility.Collapsed;
                 cmbConyuge.Visibility = Visibility.Collapsed;
+                
+                // Ocultar también la sección de eliminar
+                lblEliminar.Visibility = Visibility.Collapsed;
+                cmbEliminar.Visibility = Visibility.Collapsed;
+                pnlBotonesEliminar.Visibility = Visibility.Collapsed;
             }
 
             // Mensaje informativo si no hay padres disponibles

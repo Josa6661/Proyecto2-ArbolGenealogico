@@ -1,0 +1,212 @@
+<Window x:Class="Proyecto2_ArbolGenealogico.Views.InstruccionesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="¿Cómo usar la aplicación?"
+        Width="700" Height="600"
+        Background="#0E1A2B"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    
+    <Grid Margin="20">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="📖 Guía de Uso - Árbol Genealógico"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="#64B5F6"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+
+                <!-- Sección 1: Agregar el primer miembro -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="1 Agregar el Primer Miembro (Raíz)"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#FFD54F"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Completa todos los campos marcados con * (obligatorios)
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • El primer miembro será la <Run FontWeight="Bold" Foreground="#FFD54F">raíz del árbol</Run>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Deja vacíos los campos de "Padre" y "Cónyuge"
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            • Haz clic en <Run FontWeight="Bold" Foreground="#64B5F6">"Agregar"</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 2: Agregar hijos -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="2 Agregar Hijos"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#81C784"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Completa los datos del nuevo miembro
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • En <Run FontWeight="Bold" Foreground="#90CAF9">"Seleccionar Padre"</Run>, escribe o selecciona el nombre del padre/madre
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • <Run FontWeight="Bold">Importante:</Run> El padre debe tener al menos 10 años más que el hijo
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            • Deja vacío el campo "Cónyuge"
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 3: Agregar cónyuges -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="3 Agregar Cónyuges"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#CE93D8"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Completa los datos del cónyuge
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • En <Run FontWeight="Bold" Foreground="#CE93D8">"Seleccionar Cónyuge"</Run>, elige a quién agregar como pareja
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • <Run FontWeight="Bold">Nota:</Run> Los cónyuges se conectan horizontalmente en el árbol
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            • Cada persona solo puede tener un cónyuge
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 4: Agregar ancestros a la raíz -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="4 Agregar Ancestros a la Raíz"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#FFB74D"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Completa los datos del ancestro
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Marca la casilla <Run FontWeight="Bold" Foreground="#FFD54F">"Este será padre de la raíz actual"</Run>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            • Esto creará una nueva raíz y el miembro anterior será su hijo
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 5: Editar miembros -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="5 Editar Miembros"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#4FC3F7"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Ve a la pestaña <Run FontWeight="Bold">"Árbol Genealógico"</Run>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Haz clic en el <Run FontWeight="Bold" Foreground="#64B5F6">nombre</Run> del miembro que deseas editar
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            • Se abrirá una ventana donde podrás modificar todos sus datos
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 6: Eliminar miembros -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="6 Eliminar Miembros"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#EF5350"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,8" FontWeight="Bold">
+                            Tienes dos opciones:
+                        </TextBlock>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            🔴 <Run FontWeight="Bold" Foreground="#EF5350">Eliminar con Descendencia:</Run>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#B0BEC5" Margin="15,0,0,8">
+                            • Si es un nodo jerárquico (padre/madre): elimina el nodo y TODOS sus descendientes
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#B0BEC5" Margin="15,0,0,10">
+                            • Si es un cónyuge: solo elimina al cónyuge, manteniendo intacta la jerarquía y los hijos
+                        </TextBlock>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            🟠 <Run FontWeight="Bold" Foreground="#FF9800">Marcar como Desconocido:</Run>
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#B0BEC5" Margin="15,0,0,5">
+                            • Reemplaza al miembro con un nodo "Desconocido"
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#B0BEC5" Margin="15,0,0,5">
+                            • Mantiene toda la descendencia intacta
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#B0BEC5" Margin="15,0,0,0">
+                            • Útil cuando no tienes información de un ancestro pero conoces a sus hijos
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Sección 7: Otras características -->
+                <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
+                    <StackPanel>
+                        <TextBlock Text="7 Otras Características"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="#AED581"
+                                   Margin="0,0,0,10"/>
+                        
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            📊 <Run FontWeight="Bold">Pestaña Estadísticas:</Run> Muestra distancias entre familiares
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            🗺️ <Run FontWeight="Bold">Pestaña Mapa de Residencias:</Run> Visualiza ubicaciones geográficas
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            📏 <Run FontWeight="Bold">Calcular Distancia:</Run> Haz clic en un familiar para ver la distancia con los demás
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                            🖼️ <Run FontWeight="Bold">Fotografías:</Run> Puedes agregar fotos para cada miembro (opcional)
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Botón cerrar -->
+                <Button Content="Entendido"
+                        Width="120"
+                        Height="35"
+                        Background="#2196F3"
+                        Foreground="White"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Center"
+                        Margin="0,10,0,0"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Click="Cerrar_Click"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

@@ -26,7 +26,18 @@
                                FontSize="18"
                                FontWeight="Bold"
                                Foreground="#64B5F6"
-                               Margin="0,0,0,15"/>
+                               Margin="0,0,0,10"/>
+                    
+                    <!-- Botón ¿Cómo usar? -->
+                    <Button Content="❓ ¿Cómo usar esta aplicación?"
+                            Background="#25364F"
+                            Foreground="#FFD54F"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            Margin="0,0,0,15"
+                            Padding="8,5"
+                            HorizontalAlignment="Stretch"
+                            Click="MostrarInstrucciones_Click"/>
 
                     <!-- Nombre Completo -->
                     <TextBlock Text="Nombre Completo *" Foreground="White" FontWeight="SemiBold"/>
@@ -76,7 +87,7 @@
                               IsEditable="True"
                               IsTextSearchEnabled="True"
                               SelectionChanged="CmbPadre_SelectionChanged"
-                              ToolTip="Selecciona o escribe el nombre del padre. Dejar vacío si es la raíz del árbol"/>
+                              ToolTip="Selecciona el padre/madre del nuevo miembro. Este será un hijo JERÁRQUICO (aparecerá debajo en el árbol). Dejar vacío solo para agregar cónyuge o si es padre de la raíz."/>
 
                     <CheckBox x:Name="chkEsPadreDeRaiz"
                               Content="Este será padre de la raíz actual"
@@ -96,10 +107,10 @@
                               IsEditable="True"
                               IsTextSearchEnabled="True"
                               SelectionChanged="CmbConyuge_SelectionChanged"
-                              ToolTip="Selecciona el miembro al que quieres agregar como cónyuge"/>
+                              ToolTip="Selecciona a quién agregar como pareja/esposo(a). El nuevo miembro se conectará HORIZONTALMENTE. Los hijos en común se agregan seleccionando a cualquiera de los dos como padre."/>
 
                     <!-- Eliminar Miembro -->
-                    <TextBlock Text="Eliminar Miembro" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
+                    <TextBlock x:Name="lblEliminar" Text="Eliminar Miembro" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
                     <ComboBox x:Name="cmbEliminar" 
                               Background="#1E2F4C" 
                               Foreground="#FF5252" 
@@ -107,24 +118,44 @@
                               IsEditable="True"
                               IsTextSearchEnabled="True"
                               ToolTip="Selecciona el miembro que deseas eliminar"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,5,0,15">
-                        <Button Content="Eliminar con Descendencia"
+                    <StackPanel x:Name="pnlBotonesEliminar" Orientation="Horizontal" Margin="0,5,0,15">
+                        <Button x:Name="btnEliminarDescendencia"
+                                Content="Eliminar con Descendencia"
                                 Background="#D32F2F"
                                 Foreground="White"
                                 BorderThickness="0"
                                 Cursor="Hand"
                                 Width="125"
                                 Margin="0,0,5,0"
-                                Click="EliminarConDescendencia_Click"
-                                ToolTip="Elimina el nodo y todos sus hijos"/>
-                        <Button Content="Marcar como Desconocido"
+                                Click="EliminarConDescendencia_Click">
+                            <Button.ToolTip>
+                                <ToolTip>
+                                    <StackPanel MaxWidth="300">
+                                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Margin="0,0,0,5">Eliminar con Descendencia:</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,3">• Si es NODO JERÁRQUICO (padre/madre): elimina el nodo y TODOS sus descendientes</TextBlock>
+                                        <TextBlock TextWrapping="Wrap">• Si es CÓNYUGE: solo elimina al cónyuge, mantiene la jerarquía y los hijos intactos</TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
+                        <Button x:Name="btnMarcarDesconocido"
+                                Content="Marcar como Desconocido"
                                 Background="#FF9800"
                                 Foreground="White"
                                 BorderThickness="0"
                                 Cursor="Hand"
                                 Width="125"
-                                Click="MarcarDesconocido_Click"
-                                ToolTip="Reemplaza con nodo 'Desconocido' manteniendo descendencia"/>
+                                Click="MarcarDesconocido_Click">
+                            <Button.ToolTip>
+                                <ToolTip>
+                                    <StackPanel MaxWidth="300">
+                                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Margin="0,0,0,5">Marcar como Desconocido:</TextBlock>
+                                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,3">• Reemplaza al miembro con un nodo 'Desconocido'</TextBlock>
+                                        <TextBlock TextWrapping="Wrap">• Mantiene TODA la descendencia intacta (útil cuando no tienes datos del ancestro pero sí de sus hijos)</TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
                     </StackPanel>
 
                     <!-- Botones -->
