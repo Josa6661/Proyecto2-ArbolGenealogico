@@ -1,4 +1,5 @@
 ﻿using Proyecto2_ArbolGenealogico.DataStructures;
+using Proyecto2_ArbolGenealogico.BusinessLogic;
 using Proyecto2_ArbolGenealogico.Helpers;
 using Proyecto2_ArbolGenealogico.Services;
 using Proyecto2_ArbolGenealogico.Views;
@@ -58,7 +59,7 @@ namespace Proyecto2_ArbolGenealogico
         }
         private void ActualizarEstadisticas_Click(object sender, RoutedEventArgs e)
         {
-            var estadisticas = EstadisticasService.CalcularEstadisticas(sistema.Arbol);
+            var estadisticas = CalculadoraEstadisticas.CalcularEstadisticas(sistema.Arbol);
 
             if (!estadisticas.HayDatosSuficientes)
             {
@@ -242,6 +243,7 @@ namespace Proyecto2_ArbolGenealogico
             }
         }
 
+
         // BOTÓN AGREGAR
         private void Agregar_Click(object sender, RoutedEventArgs e)
         {
@@ -270,41 +272,41 @@ namespace Proyecto2_ArbolGenealogico
 
             if (sistema.Arbol.BuscarPorCedula(cedula) != null)
             {
-                MessageBox.Show($"Ya existe un familiar con la cédula '{cedula}'.\nCada miembro debe tener una cédula única.", 
+                MessageBox.Show($"Ya existe un familiar con la cédula '{cedula}'.\nCada miembro debe tener una cédula única.",
                     "Cédula Duplicada", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (!ValidacionHelper.ValidarFecha(fechaNacimiento, out DateTime fechaNac))
             {
-                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).", 
+                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).",
                     "Fecha Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (fechaNac > DateTime.Now)
             {
-                MessageBox.Show("La fecha de nacimiento no puede ser en el futuro.", "Fecha Inválida", 
+                MessageBox.Show("La fecha de nacimiento no puede ser en el futuro.", "Fecha Inválida",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!int.TryParse(edadTexto, out int edad) || edad < 0 || edad > 150)
             {
-                MessageBox.Show("Por favor, ingresa una edad válida (0-150).", "Edad Inválida", 
+                MessageBox.Show("Por favor, ingresa una edad válida (0-150).", "Edad Inválida",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!ValidacionHelper.ValidarEdad(fechaNac, edad, out string mensajeEdad))
+            if (!ValidacionHelper.ValidarEdad(fechaNac, edad, out _))
             {
                 int edadCalculada = DateTime.Now.Year - fechaNac.Year;
                 if (fechaNac.Date > DateTime.Now.AddYears(-edadCalculada))
                     edadCalculada--;
-                    
+
                 MessageBox.Show($"La edad ingresada ({edad}) no coincide con la fecha de nacimiento ({fechaNacimiento}).\n" +
                     $"La edad correcta basada en tu fecha de nacimiento es {edadCalculada} años.\n\n" +
-                    $"Fecha actual: {DateTime.Now:dd/MM/yyyy}", 
+                    $"Fecha actual: {DateTime.Now:dd/MM/yyyy}",
                     "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -326,14 +328,14 @@ namespace Proyecto2_ArbolGenealogico
                 var miembro = sistema.Arbol.BuscarPorNombre(conyugeNombre);
                 if (miembro == null)
                 {
-                    MessageBox.Show($"No se encontró el miembro '{conyugeNombre}'.", 
+                    MessageBox.Show($"No se encontró el miembro '{conyugeNombre}'.",
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 if (miembro.Conyuge != null)
                 {
-                    MessageBox.Show($"El miembro '{conyugeNombre}' ya tiene un cónyuge: '{miembro.Conyuge.Nombre}'.", 
+                    MessageBox.Show($"El miembro '{conyugeNombre}' ya tiene un cónyuge: '{miembro.Conyuge.Nombre}'.",
                         "Ya Tiene Cónyuge", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -344,7 +346,7 @@ namespace Proyecto2_ArbolGenealogico
                 if (diferenciaEdad > 30)
                 {
                     var result = MessageBox.Show($"Hay una diferencia de {diferenciaEdad} años entre los cónyuges.\n" +
-                        $"¿Deseas continuar de todas formas?", 
+                        $"¿Deseas continuar de todas formas?",
                         "Diferencia de Edad Grande", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (result == MessageBoxResult.No)
                         return;
@@ -354,42 +356,40 @@ namespace Proyecto2_ArbolGenealogico
             else if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
             {
                 var raizActual = sistema.Arbol.Raiz;
-                
+
                 // Validar que el nuevo padre sea mayor que la raíz actual
                 if (raizActual.Edad >= edad)
                 {
                     MessageBox.Show($"El padre debe ser mayor que la raíz actual del árbol.\n" +
                         $"Edad de la raíz actual '{raizActual.Nombre}': {raizActual.Edad} años\n" +
-                        $"Edad del nuevo padre: {edad} años", 
+                        $"Edad del nuevo padre: {edad} años",
                         "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 // Validar fechas de nacimiento
-                if (!string.IsNullOrEmpty(raizActual.FechaNacimiento))
-                {
-                    if (DateTime.TryParseExact(raizActual.FechaNacimiento, "dd/MM/yyyy", 
-                        System.Globalization.CultureInfo.InvariantCulture, 
+                if (!string.IsNullOrEmpty(raizActual.FechaNacimiento) &&
+                    DateTime.TryParseExact(raizActual.FechaNacimiento, "dd/MM/yyyy",
+                        System.Globalization.CultureInfo.InvariantCulture,
                         System.Globalization.DateTimeStyles.None, out DateTime fechaNacRaiz))
+                {
+                    if (fechaNac >= fechaNacRaiz)
                     {
-                        if (fechaNac >= fechaNacRaiz)
-                        {
-                            MessageBox.Show($"El padre debe nacer antes que la raíz actual.\n" +
-                                $"Fecha de nacimiento de la raíz: {raizActual.FechaNacimiento}\n" +
-                                $"Fecha de nacimiento del padre: {fechaNacimiento}", 
-                                "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
+                        MessageBox.Show($"El padre debe nacer antes que la raíz actual.\n" +
+                            $"Fecha de nacimiento de la raíz: {raizActual.FechaNacimiento}\n" +
+                            $"Fecha de nacimiento del padre: {fechaNacimiento}",
+                            "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
 
-                        // Validar que el padre tenga al menos 10 años cuando nace la raíz
-                        int añosDiferencia = fechaNacRaiz.Year - fechaNac.Year;
-                        if (añosDiferencia < 10)
-                        {
-                            MessageBox.Show($"El padre debe tener al menos 10 años cuando nace su hijo.\n" +
-                                $"Diferencia de edad: {añosDiferencia} años", 
-                                "Diferencia de Edad Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
+                    // Validar que el padre tenga al menos 10 años cuando nace la raíz
+                    int añosDiferencia = fechaNacRaiz.Year - fechaNac.Year;
+                    if (añosDiferencia < 10)
+                    {
+                        MessageBox.Show($"El padre debe tener al menos 10 años cuando nace su hijo.\n" +
+                            $"Diferencia de edad: {añosDiferencia} años",
+                            "Diferencia de Edad Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
                     }
                 }
             }
@@ -404,21 +404,20 @@ namespace Proyecto2_ArbolGenealogico
                     {
                         MessageBox.Show($"El hijo no puede tener la misma edad o ser mayor que su padre.\n" +
                             $"Edad del padre '{padre.Nombre}': {padre.Edad} años\n" +
-                            $"Edad del hijo: {edad} años", 
+                            $"Edad del hijo: {edad} años",
                             "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;
                     }
 
                     // Validar fechas de nacimiento (hijo debe nacer después del padre)
-                    if (!string.IsNullOrEmpty(padre.FechaNacimiento))
+                    if (!string.IsNullOrEmpty(padre.FechaNacimiento) &&
+                        ValidacionHelper.ValidarFecha(padre.FechaNacimiento, out DateTime fechaNacPadre))
                     {
-                        if (ValidacionHelper.ValidarFecha(padre.FechaNacimiento, out DateTime fechaNacPadre))
-                        {
-                            if (fechaNac <= fechaNacPadre)
+                        if (fechaNac <= fechaNacPadre)
                             {
                                 MessageBox.Show($"El hijo no puede nacer antes o el mismo día que su padre.\n" +
                                     $"Fecha de nacimiento del padre: {padre.FechaNacimiento}\n" +
-                                    $"Fecha de nacimiento del hijo: {fechaNacimiento}", 
+                                    $"Fecha de nacimiento del hijo: {fechaNacimiento}",
                                     "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
                                 return;
                             }
@@ -426,14 +425,15 @@ namespace Proyecto2_ArbolGenealogico
                             // Validar diferencia de edad mínima usando ValidacionHelper
                             if (!ValidacionHelper.ValidarDiferenciaEdadPadreHijo(fechaNacPadre, fechaNac, out string mensajeDiferencia))
                             {
-                                MessageBox.Show(mensajeDiferencia, "Diferencia de Edad Inválida", 
+                                MessageBox.Show(mensajeDiferencia, "Diferencia de Edad Inválida",
                                     MessageBoxButton.OK, MessageBoxImage.Warning);
                                 return;
                             }
                         }
                     }
                 }
-            }
+            
+        
 
             // Crear el nuevo nodo familiar con todos los datos
             NodoFamiliar nuevo = new NodoFamiliar(
@@ -448,19 +448,19 @@ namespace Proyecto2_ArbolGenealogico
 
             // Agregar al sistema (árbol + grafo)
             bool exito = false;
-            
+
             // Caso 1: Agregar un cónyuge a un miembro existente
             if (esConyuge)
             {
                 exito = sistema.Arbol.AgregarConyuge(conyugeNombre, nuevo);
                 if (exito)
                 {
-                    MessageBox.Show($"'{nombre}' ha sido agregado como cónyuge de '{conyugeNombre}'.", "Éxito", 
+                    MessageBox.Show($"'{nombre}' ha sido agregado como cónyuge de '{conyugeNombre}'.", "Éxito",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"No se pudo agregar el cónyuge. Verifica que '{conyugeNombre}' no tenga ya un cónyuge.", 
+                    MessageBox.Show($"No se pudo agregar el cónyuge. Verifica que '{conyugeNombre}' no tenga ya un cónyuge.",
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -472,14 +472,14 @@ namespace Proyecto2_ArbolGenealogico
                 sistema.Arbol.AgregarPadreARaiz(nuevo);
                 exito = true;
                 MessageBox.Show($"'{nombre}' ha sido agregado como padre de '{nombreRaizAnterior}' (antigua raíz).\n" +
-                    $"'{nombre}' es ahora la nueva raíz del árbol.", "Éxito", 
+                    $"'{nombre}' es ahora la nueva raíz del árbol.", "Éxito",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             // Caso 3: Crear la primera raíz del árbol
             else if (!sistema.Arbol.TieneRaiz())
             {
                 exito = sistema.AgregarMiembroCompleto("", nuevo);
-                MessageBox.Show($"'{nombre}' ha sido creado como raíz del árbol.", "Éxito", 
+                MessageBox.Show($"'{nombre}' ha sido creado como raíz del árbol.", "Éxito",
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             // Caso 4: Agregar un hijo a un padre existente
@@ -487,21 +487,21 @@ namespace Proyecto2_ArbolGenealogico
             {
                 if (string.IsNullOrWhiteSpace(padreNombre) || padreNombre == "(Sin familiares en el árbol)")
                 {
-                    MessageBox.Show("Por favor, especifica el nombre del padre para agregar este miembro.", 
+                    MessageBox.Show("Por favor, especifica el nombre del padre para agregar este miembro.",
                         "Padre Requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 exito = sistema.AgregarMiembroCompleto(padreNombre, nuevo);
-                
+
                 if (exito)
                 {
-                    MessageBox.Show($"'{nombre}' ha sido agregado como hijo de '{padreNombre}'.", "Éxito", 
+                    MessageBox.Show($"'{nombre}' ha sido agregado como hijo de '{padreNombre}'.", "Éxito",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"No se encontró el padre '{padreNombre}'. Verifica el nombre e intenta nuevamente.", 
+                    MessageBox.Show($"No se encontró el padre '{padreNombre}'. Verifica el nombre e intenta nuevamente.",
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }

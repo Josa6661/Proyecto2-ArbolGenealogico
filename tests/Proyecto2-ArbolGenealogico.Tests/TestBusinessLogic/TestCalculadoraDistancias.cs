@@ -1,14 +1,11 @@
-﻿// tests/Proyecto2-ArbolGenealogico.Tests/Services/TestMapaService.cs
-using System;
+﻿using System;
 using Xunit;
-using Proyecto2_ArbolGenealogico.Services;
+using Proyecto2_ArbolGenealogico.BusinessLogic;
 
-namespace Proyecto2_ArbolGenealogico.Tests.Services
+namespace Proyecto2_ArbolGenealogico.Tests.BusinessLogic
 {
-    public class TestMapaService
+    public class TestCalculadoraDistancias
     {
-        // ========== TESTS DE CÁLCULO DE DISTANCIA HAVERSINE ==========
-
         [Fact]
         public void CalcularDistanciaHaversine_EntreDosPuntosIdenticos_RetornaCero()
         {
@@ -17,7 +14,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             double lon = -84.0907;
 
             // Act
-            double distancia = MapaService.CalcularDistanciaHaversine(lat, lon, lat, lon);
+            double distancia = CalculadoraDistancias.CalcularDistanciaHaversine(lat, lon, lat, lon);
 
             // Assert
             Assert.Equal(0, distancia, 2); // Precisión de 2 decimales
@@ -33,7 +30,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             double lonCartago = -83.9191;
 
             // Act
-            double distancia = MapaService.CalcularDistanciaHaversine(
+            double distancia = CalculadoraDistancias.CalcularDistanciaHaversine(
                 latSanJose, lonSanJose, latCartago, lonCartago);
 
             // Assert - Distancia real ~20 km
@@ -51,8 +48,8 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             double lon2 = -85.0;
 
             // Act
-            double distancia1 = MapaService.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
-            double distancia2 = MapaService.CalcularDistanciaHaversine(lat2, lon2, lat1, lon1);
+            double distancia1 = CalculadoraDistancias.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
+            double distancia2 = CalculadoraDistancias.CalcularDistanciaHaversine(lat2, lon2, lat1, lon1);
 
             // Assert
             Assert.Equal(distancia1, distancia2, 2);
@@ -65,7 +62,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             double lat1, double lon1, double lat2, double lon2, double distanciaEsperada)
         {
             // Act
-            double distancia = MapaService.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
+            double distancia = CalculadoraDistancias.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
 
             // Assert - Con tolerancia del 1%
             double tolerancia = distanciaEsperada * 0.01;
@@ -83,8 +80,8 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             double lonOeste = -180;
 
             // Act & Assert - No debe lanzar excepciones
-            var distancia1 = MapaService.CalcularDistanciaHaversine(latNorte, 0, latSur, 0);
-            var distancia2 = MapaService.CalcularDistanciaHaversine(0, lonEste, 0, lonOeste);
+            var distancia1 = CalculadoraDistancias.CalcularDistanciaHaversine(latNorte, 0, latSur, 0);
+            var distancia2 = CalculadoraDistancias.CalcularDistanciaHaversine(0, lonEste, 0, lonOeste);
 
             Assert.True(distancia1 > 0);
             Assert.True(distancia2 >= 0);
@@ -104,7 +101,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
                 double lat2 = random.NextDouble() * 180 - 90;
                 double lon2 = random.NextDouble() * 360 - 180;
 
-                double distancia = MapaService.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
+                double distancia = CalculadoraDistancias.CalcularDistanciaHaversine(lat1, lon1, lat2, lon2);
 
                 Assert.True(distancia >= 0,
                     $"Distancia negativa encontrada: {distancia} para ({lat1},{lon1}) -> ({lat2},{lon2})");

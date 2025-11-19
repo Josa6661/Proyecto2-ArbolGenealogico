@@ -1,5 +1,6 @@
 using Proyecto2_ArbolGenealogico.DataStructures;
 using Proyecto2_ArbolGenealogico.Helpers;
+using Proyecto2_ArbolGenealogico.BusinessLogic;
 using System;
 using System.Windows;
 
@@ -96,21 +97,11 @@ namespace Proyecto2_ArbolGenealogico.Views
                 return;
             }
 
-            // Validar diferencia de edad con hijos si tiene
-            if (nodo.Hijos.Largo() > 0)
+            if (!ReglasNegocio.ValidarEdadPadreConHijos(nodo, edad, out string mensajeEdadHijos))
             {
-                for (int i = 0; i < nodo.Hijos.Largo(); i++)
-                {
-                    var hijo = nodo.Hijos.Obtener(i);
-                    int diferenciaEdad = edad - hijo.Edad;
-                    if (diferenciaEdad < 10)
-                    {
-                        MessageBox.Show($"La edad del padre/madre debe ser al menos 10 años mayor que la del hijo.\n" +
-                            $"Diferencia actual con {hijo.Nombre}: {diferenciaEdad} años.", 
-                            "Validación de Edad", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
+                MessageBox.Show(mensajeEdadHijos, "Validación de Edad",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
             nodo.Nombre = txtNombre.Text.Trim();

@@ -8,6 +8,7 @@ using Mapsui.UI.Wpf;
 using Mapsui.Utilities;
 using NetTopologySuite.Geometries;
 using Proyecto2_ArbolGenealogico.DataStructures;
+using Proyecto2_ArbolGenealogico.BusinessLogic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -92,29 +93,6 @@ namespace Proyecto2_ArbolGenealogico.Services
             var punto = new MPoint(x, y);
             mapControl.Map.Navigator.CenterOn(punto);
             mapControl.Map.Navigator.ZoomTo(zoom);
-        }
-
-        // Calcular distancia entre dos puntos usando la fórmula de Haversine
-        public static double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
-        {
-            const double RadioTierraKm = 6371.0;
-            
-            double dLat = GradosARadianes(lat2 - lat1);
-            double dLon = GradosARadianes(lon2 - lon1);
-            
-            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
-                      Math.Cos(GradosARadianes(lat1)) * Math.Cos(GradosARadianes(lat2)) *
-                      Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
-            
-            double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
-            double distancia = RadioTierraKm * c;
-            
-            return distancia;
-        }
-
-        private static double GradosARadianes(double grados)
-        {
-            return grados * Math.PI / 180.0;
         }
 
         // Mostrar distancias visualmente en el mapa con líneas y etiquetas

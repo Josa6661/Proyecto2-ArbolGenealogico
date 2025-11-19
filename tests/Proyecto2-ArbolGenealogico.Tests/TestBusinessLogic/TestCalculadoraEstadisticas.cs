@@ -1,11 +1,11 @@
 ﻿using System;
 using Xunit;
 using Proyecto2_ArbolGenealogico.DataStructures;
-using Proyecto2_ArbolGenealogico.Services;
+using Proyecto2_ArbolGenealogico.BusinessLogic;  // ⭐ Cambiar
 
-namespace Proyecto2_ArbolGenealogico.Tests.Services
+namespace Proyecto2_ArbolGenealogico.Tests.BusinessLogic  // ⭐ Cambiar namespace
 {
-    public class TestEstadisticasService
+    public class TestCalculadoraEstadisticas  // ⭐ Cambiar nombre de clase
     {
         [Fact]
         public void CalcularEstadisticas_SinRaiz_RetornaError()
@@ -14,7 +14,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             var arbol = new ArbolGenealogico();
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);  // ⭐
 
             // Assert
             Assert.False(resultado.HayDatosSuficientes);
@@ -22,7 +22,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
         }
 
         [Fact]
-        public void CalcularEstadisticas_ConUnSoloMiembro_RetornaError()
+        public static void CalcularEstadisticas_ConUnSoloMiembro_RetornaError()
         {
             // Arrange
             var arbol = new ArbolGenealogico();
@@ -30,7 +30,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.CrearRaiz(raiz);
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.False(resultado.HayDatosSuficientes);
@@ -49,7 +49,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.AgregarMiembro("SanJose", hijo);
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.True(resultado.HayDatosSuficientes);
@@ -73,7 +73,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.AgregarMiembro("Cerca1", nodo3);
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.True(resultado.HayDatosSuficientes);
@@ -103,7 +103,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.AgregarMiembro("Valido1", nodo3);
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.True(resultado.HayDatosSuficientes);
@@ -124,7 +124,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.AgregarMiembro("Desc1", nodo2);
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.False(resultado.HayDatosSuficientes);
@@ -144,7 +144,7 @@ namespace Proyecto2_ArbolGenealogico.Tests.Services
             arbol.AgregarMiembro("N3", new NodoFamiliar("N5", "5", "01/01/2003", 21, "f5.jpg", 9.0, -83.0));
 
             // Act
-            var resultado = EstadisticasService.CalcularEstadisticas(arbol);
+            var resultado = CalculadoraEstadisticas.CalcularEstadisticas(arbol);
 
             // Assert
             Assert.True(resultado.HayDatosSuficientes);

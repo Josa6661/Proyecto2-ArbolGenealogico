@@ -1,23 +1,20 @@
 ﻿using Proyecto2_ArbolGenealogico.DataStructures;
 using System;
 
-namespace Proyecto2_ArbolGenealogico.Services
+namespace Proyecto2_ArbolGenealogico.BusinessLogic
 {
-    public class EstadisticasService
+    public static class CalculadoraEstadisticas  // ⭐ Agregué 'static' aquí también
     {
         public class ResultadoEstadisticas
         {
             public bool HayDatosSuficientes { get; set; }
             public string MensajeError { get; set; }
-
             public NodoFamiliar ParLejanoA { get; set; }
             public NodoFamiliar ParLejanoB { get; set; }
             public double DistanciaMaxima { get; set; }
-
             public NodoFamiliar ParCercanoA { get; set; }
             public NodoFamiliar ParCercanoB { get; set; }
             public double DistanciaMinima { get; set; }
-
             public double DistanciaPromedio { get; set; }
             public int TotalPares { get; set; }
         }
@@ -65,7 +62,8 @@ namespace Proyecto2_ArbolGenealogico.Services
                     if (double.IsNaN(f2.Latitud) || double.IsNaN(f2.Longitud))
                         continue;
 
-                    double d = MapaService.CalcularDistanciaHaversine(
+                    // ⭐⭐⭐ AQUÍ ESTÁ EL CAMBIO ⭐⭐⭐
+                    double d = CalculadoraDistancias.CalcularDistanciaHaversine(
                         f1.Latitud, f1.Longitud,
                         f2.Latitud, f2.Longitud
                     );

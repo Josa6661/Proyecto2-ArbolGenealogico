@@ -1,4 +1,5 @@
 ﻿using Proyecto2_ArbolGenealogico.Services;
+using Proyecto2_ArbolGenealogico.BusinessLogic;
 
 namespace Proyecto2_ArbolGenealogico.DataStructures
 {
@@ -8,7 +9,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         private ListaEnlazada<DistanciaEntreNodos> distancias;
 
         // Clase auxiliar para almacenar distancias
-        private class DistanciaEntreNodos
+        private sealed class DistanciaEntreNodos
         {
             public string Cedula1 { get; set; }
             public string Cedula2 { get; set; }
@@ -132,7 +133,7 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             if (nodo1 == null || nodo2 == null)
                 return;
 
-            double distancia = MapaService.CalcularDistanciaHaversine(
+            double distancia = CalculadoraDistancias.CalcularDistanciaHaversine(
                 nodo1.Latitud, nodo1.Longitud,
                 nodo2.Latitud, nodo2.Longitud
             );
