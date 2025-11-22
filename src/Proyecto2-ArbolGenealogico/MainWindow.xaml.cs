@@ -30,7 +30,10 @@ namespace Proyecto2_ArbolGenealogico
             chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
             lblConyuge.Visibility = Visibility.Collapsed;
             cmbConyuge.Visibility = Visibility.Collapsed;
-            
+            lblHermano.Visibility = Visibility.Collapsed;
+            cmbHermano.Visibility = Visibility.Collapsed;
+
+
             // Ocultar sección de eliminar hasta que se cree el primer miembro
             lblEliminar.Visibility = Visibility.Collapsed;
             cmbEliminar.Visibility = Visibility.Collapsed;
@@ -97,7 +100,9 @@ namespace Proyecto2_ArbolGenealogico
                 chkEsPadreDeRaiz.Visibility = Visibility.Visible;
                 lblConyuge.Visibility = Visibility.Visible;
                 cmbConyuge.Visibility = Visibility.Visible;
-                
+                lblHermano.Visibility = Visibility.Visible;
+                cmbHermano.Visibility = Visibility.Visible;
+
                 // Mostrar también la sección de eliminar
                 lblEliminar.Visibility = Visibility.Visible;
                 cmbEliminar.Visibility = Visibility.Visible;
@@ -111,7 +116,9 @@ namespace Proyecto2_ArbolGenealogico
                 chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
                 lblConyuge.Visibility = Visibility.Collapsed;
                 cmbConyuge.Visibility = Visibility.Collapsed;
-                
+                lblHermano.Visibility = Visibility.Collapsed;
+                cmbHermano.Visibility = Visibility.Collapsed;
+
                 // Ocultar también la sección de eliminar
                 lblEliminar.Visibility = Visibility.Collapsed;
                 cmbEliminar.Visibility = Visibility.Collapsed;
@@ -130,6 +137,7 @@ namespace Proyecto2_ArbolGenealogico
             }
             
             ActualizarListaConyuges();
+            ActualizarListaHermanos();
             ActualizarListaEliminar();
         }
         
@@ -163,6 +171,56 @@ namespace Proyecto2_ArbolGenealogico
                 cmbConyuge.IsEnabled = true;
             }
         }
+
+        //Actualiza la lista de miembros disponibles para agregar como hermanos
+        private void ActualizarListaHermanos()
+        {
+            cmbHermano.Items.Clear();
+
+            if (sistema.Arbol.TieneRaiz())
+            {
+                var todosLosMiembros = sistema.Arbol.ObtenerNodosJerarquicos();
+                for (int i = 0; i < todosLosMiembros.Largo(); i++)
+                {
+                    var miembro = todosLosMiembros.Obtener(i);
+                    // Solo agregar miembros que tengan padre (para poder agregar hermano)
+                    if (miembro.Padre != null)
+                    {
+                        cmbHermano.Items.Add(miembro.Nombre);
+                    }
+                }
+            }
+
+            // Mensaje informativo si no hay miembros disponibles
+            if (cmbHermano.Items.Count == 0)
+            {
+                cmbHermano.Items.Add("(Sin miembros con padres)");
+                cmbHermano.IsEnabled = false;
+            }
+            else
+            {
+                cmbHermano.IsEnabled = true;
+            }
+        }
+
+        //Manejar cuando se selecciona un hermano
+        private void CmbHermano_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Si se selecciona un hermano válido, limpiar padre, cónyuge y checkbox
+            if (cmbHermano.SelectedIndex >= 0 && cmbHermano.SelectedItem != null)
+            {
+                string seleccion = cmbHermano.SelectedItem.ToString();
+                if (!string.IsNullOrWhiteSpace(seleccion) && seleccion != "(Sin miembros con padres)")
+                {
+                    cmbPadre.SelectedIndex = -1;
+                    cmbPadre.Text = "";
+                    cmbConyuge.SelectedIndex = -1;
+                    cmbConyuge.Text = "";
+                    chkEsPadreDeRaiz.IsChecked = false;
+                }
+            }
+        }
+
 
         // Actualiza la lista de miembros disponibles para eliminar
         private void ActualizarListaEliminar()
@@ -223,6 +281,8 @@ namespace Proyecto2_ArbolGenealogico
                 {
                     cmbConyuge.SelectedIndex = -1;
                     cmbConyuge.Text = "";
+                    cmbHermano.SelectedIndex = -1;
+                    cmbHermano.Text = "";
                 }
             }
         }
@@ -239,6 +299,8 @@ namespace Proyecto2_ArbolGenealogico
                     cmbPadre.SelectedIndex = -1;
                     cmbPadre.Text = "";
                     chkEsPadreDeRaiz.IsChecked = false;
+                    cmbHermano.SelectedIndex = -1;
+                    cmbHermano.Text = "";
                 }
             }
         }
@@ -321,6 +383,11 @@ namespace Proyecto2_ArbolGenealogico
             bool esPadreDeRaiz = chkEsPadreDeRaiz.IsChecked == true;
             string conyugeNombre = cmbConyuge.Text.Trim();
             bool esConyuge = !string.IsNullOrWhiteSpace(conyugeNombre) && conyugeNombre != "(Sin miembros disponibles)";
+
+            //Detectar si es hermano
+            string hermanoNombre = cmbHermano.Text.Trim();
+            bool esHermano = !string.IsNullOrWhiteSpace(hermanoNombre) && hermanoNombre != "(Sin miembros con padres)";
+
 
             // Si es cónyuge, validar que se haya seleccionado un miembro
             if (esConyuge)
@@ -432,8 +499,100 @@ namespace Proyecto2_ArbolGenealogico
                         }
                     }
                 }
-            
-        
+            // Validar relación de hermanos
+            else if (esHermano)
+            {
+                var hermano = sistema.Arbol.BuscarPorNombre(hermanoNombre);
+                if (hermano == null)
+                {
+                    MessageBox.Show($"No se encontró el miembro '{hermanoNombre}'.",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (hermano.Padre == null)
+                {
+                    MessageBox.Show($"El miembro '{hermanoNombre}' no tiene padre asignado.\n" +
+                        "No se puede agregar un hermano sin padre común.\n\n" +
+                        "Sugerencia: Primero crea al padre y luego agrega a los hermanos.",
+                        "Sin Padre", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validar edades (hermanos deben tener edades cercanas, pero no idénticas)
+                int diferenciaEdad = Math.Abs(hermano.Edad - edad);
+
+                // Advertir si la diferencia es muy grande (más de 25 años)
+                if (diferenciaEdad > 25)
+                {
+                    var result = MessageBox.Show(
+                        $"Hay una diferencia de {diferenciaEdad} años entre los hermanos:\n" +
+                        $"• {hermanoNombre}: {hermano.Edad} años\n" +
+                        $"• {nombre}: {edad} años\n\n" +
+                        $"¿Estás seguro de que son hermanos? Podrían ser padre/hijo o tío/sobrino.\n" +
+                        $"¿Deseas continuar de todas formas?",
+                        "Diferencia de Edad Grande",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.No)
+                        return;
+                }
+
+                // Validar fechas de nacimiento si están disponibles
+                if (!string.IsNullOrEmpty(hermano.FechaNacimiento) &&
+                    ValidacionHelper.ValidarFecha(hermano.FechaNacimiento, out DateTime fechaNacHermano))
+                {
+                    // Los hermanos no pueden nacer el mismo día (a menos que sean gemelos, pero eso es raro)
+                    if (fechaNac == fechaNacHermano)
+                    {
+                        var result = MessageBox.Show(
+                            $"Ambos hermanos tienen la misma fecha de nacimiento.\n" +
+                            $"¿Son gemelos/mellizos?\n\n" +
+                            $"Si no lo son, verifica las fechas.",
+                            "Misma Fecha de Nacimiento",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+                        if (result == MessageBoxResult.No)
+                            return;
+                    }
+
+                    // Validar orden cronológico si hay diferencia significativa
+                    TimeSpan diferenciaTiempo = (fechaNac - fechaNacHermano).Duration();
+                    int mesesDiferencia = (int)(diferenciaTiempo.TotalDays / 30);
+
+                    if (mesesDiferencia < 9 && fechaNac != fechaNacHermano)
+                    {
+                        MessageBox.Show(
+                            $"Los hermanos tienen menos de 9 meses de diferencia:\n" +
+                            $"• {hermanoNombre}: {hermano.FechaNacimiento}\n" +
+                            $"• {nombre}: {fechaNacimiento}\n\n" +
+                            $"Esto es biológicamente imposible (a menos que sean gemelos).\n" +
+                            $"Por favor verifica las fechas.",
+                            "Fechas Inconsistentes",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                // Validar que el padre sea mayor que ambos hermanos
+                if (hermano.Padre.Edad <= edad)
+                {
+                    MessageBox.Show(
+                        $"El padre común debe ser mayor que ambos hermanos.\n" +
+                        $"Edad del padre '{hermano.Padre.Nombre}': {hermano.Padre.Edad} años\n" +
+                        $"Edad del nuevo hermano '{nombre}': {edad} años",
+                        "Edad Inconsistente",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
+
+
 
             // Crear el nuevo nodo familiar con todos los datos
             NodoFamiliar nuevo = new NodoFamiliar(
@@ -465,6 +624,47 @@ namespace Proyecto2_ArbolGenealogico
                     return;
                 }
             }
+            // Caso 1.5: Agregar un hermano a un miembro existente
+            else if (esHermano)
+            {
+                var hermano = sistema.Arbol.BuscarPorNombre(hermanoNombre);
+                if (hermano != null && hermano.Padre != null)
+                {
+                    // Agregar como hijo del mismo padre
+                    string nombrePadreComun = hermano.Padre.Nombre;
+                    exito = sistema.AgregarMiembroCompleto(nombrePadreComun, nuevo);
+
+                    if (exito)
+                    {
+                        MessageBox.Show(
+                            $"'{nombre}' ha sido agregado como hermano/hermana de '{hermanoNombre}'.\n" +
+                            $"Ambos son hijos de '{nombrePadreComun}'.",
+                            "Éxito",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            $"No se pudo agregar como hermano de '{hermanoNombre}'.\n" +
+                            $"Verifica que el padre '{nombrePadreComun}' exista.",
+                            "Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"No se encontró el hermano '{hermanoNombre}' o no tiene padre asignado.",
+                        "Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    return;
+                }
+            }
+
             // Caso 2: Agregar un padre a la raíz actual
             else if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
             {
@@ -751,6 +951,8 @@ namespace Proyecto2_ArbolGenealogico
             cmbPadre.Text = "";
             cmbConyuge.SelectedIndex = -1;
             cmbConyuge.Text = "";
+            cmbHermano.SelectedIndex = -1;
+            cmbHermano.Text = "";
         }
     }
 }

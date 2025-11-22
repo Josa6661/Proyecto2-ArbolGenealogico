@@ -108,7 +108,29 @@
                               IsTextSearchEnabled="True"
                               SelectionChanged="CmbConyuge_SelectionChanged"
                               ToolTip="Selecciona a quién agregar como pareja/esposo(a). El nuevo miembro se conectará HORIZONTALMENTE. Los hijos en común se agregan seleccionando a cualquiera de los dos como padre."/>
+                    
+                    <!-- ✨ NUEVO: Hermano (opcional) ✨ -->
+                    <TextBlock x:Name="lblHermano" 
+                               Text="O Hermano/Hermana de (opcional)" 
+                               Foreground="White" 
+                               FontWeight="SemiBold" 
+                               Margin="0,10,0,0"/>
 
+                    <TextBlock Text="Útil para agregar tíos, primos, etc." 
+                               Foreground="#FFD54F" 
+                               FontSize="10" 
+                               Margin="0,2,0,5"
+                               FontStyle="Italic"/>
+
+                    <ComboBox x:Name="cmbHermano" 
+                              Background="#1E2F4C" 
+                              Foreground="#AB47BC" 
+                              Margin="0,5,0,15"
+                              IsEditable="True"
+                              IsTextSearchEnabled="True"
+                              SelectionChanged="CmbHermano_SelectionChanged"
+                              ToolTip="Selecciona de quién será hermano(a). El nuevo miembro se agregará automáticamente como hijo de los mismos padres. Útil para agregar hermanos, tíos, primos, etc."/>
+                    
                     <!-- Eliminar Miembro -->
                     <TextBlock x:Name="lblEliminar" Text="Eliminar Miembro" Foreground="White" FontWeight="SemiBold" Margin="0,5,0,0"/>
                     <ComboBox x:Name="cmbEliminar" 
