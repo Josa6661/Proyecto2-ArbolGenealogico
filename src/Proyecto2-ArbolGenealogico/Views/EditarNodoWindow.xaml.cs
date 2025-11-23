@@ -25,8 +25,8 @@ namespace Proyecto2_ArbolGenealogico.Views
             txtFechaNacimiento.Text = nodo.FechaNacimiento;
             txtEdad.Text = nodo.Edad.ToString();
             txtFotoRuta.Text = nodo.FotoRuta ?? "";
-            txtLatitud.Text = nodo.Latitud.ToString();
-            txtLongitud.Text = nodo.Longitud.ToString();
+            txtLatitud.Text = nodo.Latitud.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            txtLongitud.Text = nodo.Longitud.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             // Si es un nodo "Desconocido", permitir editar la cédula
             if (nodo.Cedula.StartsWith("DESCONOCIDO-"))
