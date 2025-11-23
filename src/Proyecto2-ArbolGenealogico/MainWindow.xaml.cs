@@ -184,7 +184,7 @@ namespace Proyecto2_ArbolGenealogico
                 {
                     var miembro = todosLosMiembros.Obtener(i);
                     // Solo agregar miembros que tengan padre (para poder agregar hermano)
-                    if (miembro.Padre != null)
+                    if (miembro.Padres.Largo() > 0)
                     {
                         cmbHermano.Items.Add(miembro.Nombre);
                     }
@@ -510,14 +510,15 @@ namespace Proyecto2_ArbolGenealogico
                     return;
                 }
 
-                if (hermano.Padre == null)
+                if (hermano.Padres.Largo() == 0)
                 {
-                    MessageBox.Show($"El miembro '{hermanoNombre}' no tiene padre asignado.\n" +
+                    MessageBox.Show($"El miembro '{hermanoNombre}' no tiene padres asignados.\n" +
                         "No se puede agregar un hermano sin padre común.\n\n" +
                         "Sugerencia: Primero crea al padre y luego agrega a los hermanos.",
-                        "Sin Padre", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "Sin Padres", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
+
 
                 // Validar edades (hermanos deben tener edades cercanas, pero no idénticas)
                 int diferenciaEdad = Math.Abs(hermano.Edad - edad);
@@ -577,17 +578,22 @@ namespace Proyecto2_ArbolGenealogico
                     }
                 }
 
-                // Validar que el padre sea mayor que ambos hermanos
-                if (hermano.Padre.Edad <= edad)
+
+                // Validar que el(los) padre(s) sea(n) mayor(es) que ambos hermanos
+                for (int p = 0; p < hermano.Padres.Largo(); p++)
                 {
-                    MessageBox.Show(
-                        $"El padre común debe ser mayor que ambos hermanos.\n" +
-                        $"Edad del padre '{hermano.Padre.Nombre}': {hermano.Padre.Edad} años\n" +
-                        $"Edad del nuevo hermano '{nombre}': {edad} años",
-                        "Edad Inconsistente",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                    return;
+                    var padre = hermano.Padres.Obtener(p);
+                    if (padre.Edad <= edad)
+                    {
+                        MessageBox.Show(
+                            $"El padre común debe ser mayor que ambos hermanos.\n" +
+                            $"Edad del padre '{padre.Nombre}': {padre.Edad} años\n" +
+                            $"Edad del nuevo hermano '{nombre}': {edad} años",
+                            "Edad Inconsistente",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
                 }
             }
 
@@ -628,11 +634,19 @@ namespace Proyecto2_ArbolGenealogico
             else if (esHermano)
             {
                 var hermano = sistema.Arbol.BuscarPorNombre(hermanoNombre);
-                if (hermano != null && hermano.Padre != null)
+                if (hermano != null && hermano.Padres.Largo() > 0)
                 {
-                    // Agregar como hijo del mismo padre
-                    string nombrePadreComun = hermano.Padre.Nombre;
+                    // Agregar como hijo del primer padre
+                    string nombrePadreComun = hermano.Padres.Obtener(0).Nombre;
                     exito = sistema.AgregarMiembroCompleto(nombrePadreComun, nuevo);
+
+                    // Si el hermano tiene 2 padres, agregar el segundo también
+                    if (hermano.Padres.Largo() == 2 && exito)
+                    {
+                        var segundoPadre = hermano.Padres.Obtener(1);
+                        nuevo.AgregarPadre(segundoPadre);
+                        segundoPadre.Hijos.AgregarFinal(nuevo);
+                    }
 
                     if (exito)
                     {
@@ -657,7 +671,7 @@ namespace Proyecto2_ArbolGenealogico
                 else
                 {
                     MessageBox.Show(
-                        $"No se encontró el hermano '{hermanoNombre}' o no tiene padre asignado.",
+                        $"No se encontró el hermano '{hermanoNombre}' o no tiene padres asignados.",
                         "Error",
                         MessageBoxButton.OK,
                         MessageBoxImage.Error);

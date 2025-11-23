@@ -202,5 +202,23 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             miembro.EstablecerConyuge(conyuge);
             return true;
         }
+        // Busca todos los hijos de un nodo específico (útil para hermanos)
+        public ListaEnlazada<NodoFamiliar> ObtenerHijosDeNodo(string nombrePadre)
+        {
+            var resultado = new ListaEnlazada<NodoFamiliar>();
+            var padre = BuscarPorNombre(nombrePadre);
+
+            if (padre != null)
+            {
+                for (int i = 0; i < padre.Hijos.Largo(); i++)
+                {
+                    resultado.AgregarFinal(padre.Hijos.Obtener(i));
+                }
+            }
+
+            return resultado;
+        }
+
+
     }
 }
