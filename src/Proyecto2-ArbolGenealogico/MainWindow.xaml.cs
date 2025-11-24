@@ -885,7 +885,19 @@ namespace Proyecto2_ArbolGenealogico
                 var nodosAEliminar = new ListaEnlazada<NodoFamiliar>();
                 RecopilarNodoYDescendientes(miembro, nodosAEliminar);
                 
+                // Si tiene cónyuge, solo romper la relación
+                // El cónyuge permanece en el árbol como nodo independiente con sus ancestros intactos
+                if (miembro.Conyuge != null)
+                {
+                    var conyuge = miembro.Conyuge;
+                    
+                    // Romper la relación de cónyuge bidireccional
+                    conyuge.Conyuge = null;
+                    miembro.Conyuge = null;
+                }
+                
                 // Eliminar referencias de padres en el nodo a eliminar
+                // Esto es importante para que EliminarMiembro no intente eliminar a los padres
                 for (int i = 0; i < miembro.Padres.Largo(); i++)
                 {
                     var padre = miembro.Padres.Obtener(i);
@@ -898,12 +910,6 @@ namespace Proyecto2_ArbolGenealogico
                             break;
                         }
                     }
-                }
-                
-                // Si el miembro tiene cónyuge, eliminar la relación bidireccional
-                if (miembro.Conyuge != null)
-                {
-                    miembro.Conyuge.Conyuge = null;
                 }
 
                 // Eliminar el miembro del árbol

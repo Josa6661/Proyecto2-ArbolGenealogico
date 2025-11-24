@@ -226,7 +226,15 @@ namespace Proyecto2_ArbolGenealogico.Views
                 DibujarNodoSimple(padre, xPadreReal, yPadres);
                 
                 // Línea de conexión directa del padre al hijo
-                DibujarLineaConexion(xPadreReal, yPadres + nodoAlto, xPadreReal, yHijo, Color.FromRgb(100, 181, 246));
+                DibujarLineaConexion(xPadreReal, yPadres + nodoAlto, xHijo, yHijo, Color.FromRgb(100, 181, 246));
+                
+                // DIBUJAR HERMANOS (otros hijos del padre único)
+                if (padre.Hijos.Largo() > 1)
+                {
+                    // Determinar dirección para dibujar hermanos
+                    bool dibujarIzquierda = hijo.Conyuge == null || xHijo <= canvas.Width / 2;
+                    DibujarHermanosDeUnSoloPadre(padre, hijo, xHijo, yHijo, xPadreReal, yPadres, dibujarIzquierda);
+                }
                 
                 return xPadreReal; // El hijo debe estar en la misma X que su único padre
             }
@@ -359,6 +367,90 @@ namespace Proyecto2_ArbolGenealogico.Views
                     
                     // Dibujar línea de conexión
                     DibujarLineaConexion(xMedioPadres, yPadres + nodoAlto, xHermano, yHijos, Color.FromRgb(100, 181, 246));
+                    
+                    // Dibujar el hermano y sus descendientes
+                    DibujarNodoYDescendientes(hijo, xHermano, yHijos);
+                    
+                    // Mover a la derecha para el siguiente hermano
+                    xActual = xActual + anchoHermano + espacioEntreHermanos;
+                }
+            }
+        }
+
+        // Dibuja los hermanos de un nodo cuando solo hay un padre
+        private void DibujarHermanosDeUnSoloPadre(NodoFamiliar padre, NodoFamiliar hijoReferencia, double xHijoRef, double yHijos, double xPadre, double yPadres, bool dibujarIzquierda)
+        {
+            if (padre == null || padre.Hijos.Largo() <= 1)
+                return; // No hay hermanos que dibujar
+            
+            // Calcular ancho total de los hermanos (sin el hijo de referencia)
+            double anchoTotalHermanos = 0;
+            int cantidadHermanos = 0;
+            for (int i = 0; i < padre.Hijos.Largo(); i++)
+            {
+                var hijo = padre.Hijos.Obtener(i);
+                if (hijo != hijoReferencia)
+                {
+                    anchoTotalHermanos += CalcularAncho(hijo);
+                    cantidadHermanos++;
+                }
+            }
+            
+            if (cantidadHermanos == 0)
+                return;
+            
+            // Calcular el ancho que ocupa el hijo de referencia (con cónyuge si lo tiene)
+            double anchoHijoRef = CalcularAncho(hijoReferencia);
+            double espacioEntreHermanos = 20;
+            
+            if (dibujarIzquierda)
+            {
+                // HERMANOS A LA IZQUIERDA
+                // Empezar desde la izquierda del hijo de referencia y retroceder
+                double xActual = xHijoRef - (anchoHijoRef / 2) - espacioEntreHermanos;
+                
+                // Dibujar hermanos de derecha a izquierda (más cercanos primero)
+                for (int i = padre.Hijos.Largo() - 1; i >= 0; i--)
+                {
+                    var hijo = padre.Hijos.Obtener(i);
+                    
+                    // Saltar el hijo de referencia
+                    if (hijo == hijoReferencia)
+                        continue;
+                    
+                    double anchoHermano = CalcularAncho(hijo);
+                    double xHermano = xActual - (anchoHermano / 2);
+                    
+                    // Dibujar línea de conexión desde el padre único
+                    DibujarLineaConexion(xPadre, yPadres + nodoAlto, xHermano, yHijos, Color.FromRgb(100, 181, 246));
+                    
+                    // Dibujar el hermano y sus descendientes
+                    DibujarNodoYDescendientes(hijo, xHermano, yHijos);
+                    
+                    // Mover a la izquierda para el siguiente hermano
+                    xActual = xActual - anchoHermano - espacioEntreHermanos;
+                }
+            }
+            else
+            {
+                // HERMANOS A LA DERECHA
+                // Empezar desde la derecha del hijo de referencia y avanzar
+                double xActual = xHijoRef + (anchoHijoRef / 2) + espacioEntreHermanos;
+                
+                // Dibujar hermanos de izquierda a derecha
+                for (int i = 0; i < padre.Hijos.Largo(); i++)
+                {
+                    var hijo = padre.Hijos.Obtener(i);
+                    
+                    // Saltar el hijo de referencia
+                    if (hijo == hijoReferencia)
+                        continue;
+                    
+                    double anchoHermano = CalcularAncho(hijo);
+                    double xHermano = xActual + (anchoHermano / 2);
+                    
+                    // Dibujar línea de conexión desde el padre único
+                    DibujarLineaConexion(xPadre, yPadres + nodoAlto, xHermano, yHijos, Color.FromRgb(100, 181, 246));
                     
                     // Dibujar el hermano y sus descendientes
                     DibujarNodoYDescendientes(hijo, xHermano, yHijos);

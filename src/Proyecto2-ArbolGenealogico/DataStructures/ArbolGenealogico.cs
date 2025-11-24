@@ -75,7 +75,32 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         {
             if (Raiz != null && Raiz.Nombre == nombre)
             {
-                Raiz = null;
+                // Si la raíz tiene padres, promover al primer padre como nueva raíz
+                if (Raiz.Padres.Largo() > 0)
+                {
+                    var nuevaRaiz = Raiz.Padres.Obtener(0);
+                    
+                    // Eliminar la raíz actual de la lista de hijos de TODOS sus padres
+                    for (int p = 0; p < Raiz.Padres.Largo(); p++)
+                    {
+                        var padre = Raiz.Padres.Obtener(p);
+                        for (int i = 0; i < padre.Hijos.Largo(); i++)
+                        {
+                            if (padre.Hijos.Obtener(i).Nombre == nombre)
+                            {
+                                padre.Hijos.EliminarPorIndice(i);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    Raiz = nuevaRaiz;
+                }
+                else
+                {
+                    // Si no tiene padres, eliminar todo el árbol
+                    Raiz = null;
+                }
                 return true;
             }
 
@@ -303,12 +328,33 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             if (miembro.Padres.Largo() >= 2)
                 return false;
 
+            NodoFamiliar primerPadre = null;
+            bool debeEstablecerConyuges = false;
+
+            // Si ya tiene 1 padre, necesitaremos establecer relación de cónyuge DESPUÉS
+            if (miembro.Padres.Largo() == 1)
+            {
+                primerPadre = miembro.Padres.Obtener(0);
+                
+                // Solo establecer como cónyuges si ninguno tiene ya otro cónyuge
+                if (primerPadre.Conyuge == null && nuevoPadre.Conyuge == null)
+                {
+                    debeEstablecerConyuges = true;
+                }
+            }
+
             // Agregar el nuevo padre al miembro
             if (!miembro.AgregarPadre(nuevoPadre))
                 return false;
 
             // Agregar el miembro como hijo del nuevo padre
             nuevoPadre.AgregarHijo(miembro);
+
+            // AHORA establecer como cónyuges DESPUÉS de haber agregado la relación padre-hijo
+            if (debeEstablecerConyuges && primerPadre != null)
+            {
+                EstablecerConyugesYSincronizarHijos(primerPadre, nuevoPadre);
+            }
 
             return true;
         }
@@ -336,6 +382,69 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             madre.AgregarHijo(miembro);
 
             return true;
+        }
+
+        // Establece dos nodos como cónyuges y sincroniza sus hijos
+        private void EstablecerConyugesYSincronizarHijos(NodoFamiliar padre1, NodoFamiliar padre2)
+        {
+            // Establecer relación de cónyuge (sin sincronizar hijos automáticamente)
+            padre1.Conyuge = padre2;
+            padre2.Conyuge = padre1;
+
+            // Sincronizar hijos manualmente
+            // Agregar los hijos de padre1 a padre2
+            for (int i = 0; i < padre1.Hijos.Largo(); i++)
+            {
+                var hijo = padre1.Hijos.Obtener(i);
+                
+                // Verificar si padre2 ya tiene este hijo
+                bool yaEsHijo = false;
+                for (int j = 0; j < padre2.Hijos.Largo(); j++)
+                {
+                    if (padre2.Hijos.Obtener(j) == hijo)
+                    {
+                        yaEsHijo = true;
+                        break;
+                    }
+                }
+                
+                if (!yaEsHijo)
+                {
+                    padre2.Hijos.AgregarFinal(hijo);
+                    // Agregar padre2 como padre del hijo si tiene espacio
+                    if (hijo.Padres.Largo() < 2)
+                    {
+                        hijo.Padres.AgregarFinal(padre2);
+                    }
+                }
+            }
+
+            // Agregar los hijos de padre2 a padre1
+            for (int i = 0; i < padre2.Hijos.Largo(); i++)
+            {
+                var hijo = padre2.Hijos.Obtener(i);
+                
+                // Verificar si padre1 ya tiene este hijo
+                bool yaEsHijo = false;
+                for (int j = 0; j < padre1.Hijos.Largo(); j++)
+                {
+                    if (padre1.Hijos.Obtener(j) == hijo)
+                    {
+                        yaEsHijo = true;
+                        break;
+                    }
+                }
+                
+                if (!yaEsHijo)
+                {
+                    padre1.Hijos.AgregarFinal(hijo);
+                    // Agregar padre1 como padre del hijo si tiene espacio
+                    if (hijo.Padres.Largo() < 2)
+                    {
+                        hijo.Padres.AgregarFinal(padre1);
+                    }
+                }
+            }
         }
 
         // Obtener todos los nodos que son raíces (no tienen padres)

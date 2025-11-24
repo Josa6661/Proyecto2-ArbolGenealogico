@@ -59,8 +59,11 @@
                         <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
                             • <Run FontWeight="Bold">Importante:</Run> El padre debe tener al menos 10 años más que el hijo
                         </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Foreground="White">
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
                             • Deja vacío el campo "Cónyuge"
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • <Run FontWeight="Bold" Foreground="#81C784">Hermanos:</Run> Para agregar hermanos, selecciona "Será hermano/a de..." y elige un familiar existente
                         </TextBlock>
                     </StackPanel>
                 </Border>
@@ -89,23 +92,33 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Sección 4: Agregar ancestros a la raíz -->
+                <!-- Sección 4: Agregar padres adicionales -->
                 <Border Background="#13243C" CornerRadius="5" Padding="15" Margin="0,0,0,15">
                     <StackPanel>
-                        <TextBlock Text="4 Agregar Ancestros a la Raíz"
+                        <TextBlock Text="4 Agregar Padres Adicionales"
                                    FontSize="16"
                                    FontWeight="Bold"
                                    Foreground="#FFB74D"
                                    Margin="0,0,0,10"/>
                         
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,8" FontWeight="Bold">
+                            Cada persona puede tener hasta 2 padres:
+                        </TextBlock>
+                        
                         <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
-                            • Completa los datos del ancestro
+                            • Ve a la pestaña <Run FontWeight="Bold" Foreground="#FFB74D">"Agregar Padres/Madres"</Run>
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
-                            • Marca la casilla <Run FontWeight="Bold" Foreground="#FFD54F">"Este será padre de la raíz actual"</Run>
+                            • Selecciona el miembro que necesita un padre/madre adicional
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • Completa los datos del segundo padre/madre
+                        </TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="White" Margin="0,0,0,5">
+                            • <Run FontWeight="Bold" Foreground="#81C784">Sincronización automática:</Run> Al agregar el segundo padre, se establecerá como cónyuge del primero
                         </TextBlock>
                         <TextBlock TextWrapping="Wrap" Foreground="White">
-                            • Esto creará una nueva raíz y el miembro anterior será su hijo
+                            • Los hermanos existentes del primer padre automáticamente tendrán ambos padres
                         </TextBlock>
                     </StackPanel>
                 </Border>
