@@ -33,14 +33,6 @@ Diagrama UML completo con todas las clases del sistema, sus relaciones, atributo
 - Revisa el **Diagrama de Clases** para conocer las clases específicas y sus responsabilidades
 - Los diagramas Mermaid se visualizan automáticamente en GitHub
 
-### Para la Wiki de GitHub
-Estos archivos están diseñados para ser incluidos directamente en la wiki de GitHub:
-
-1. Ve a la pestaña **Wiki** de tu repositorio
-2. Crea nuevas páginas con los nombres correspondientes
-3. Copia y pega el contenido de cada archivo .md
-4. Los diagramas Mermaid se renderizarán automáticamente
-
 ## 📊 Visualización de Diagramas
 
 Los diagramas están escritos en **Mermaid**, que se renderiza automáticamente en:
@@ -69,7 +61,3 @@ Esta documentación debe actualizarse cuando:
   - 🟡 Amarillo: Utilidades
 
 ---
-
-**Proyecto:** Árbol Genealógico  
-**Versión:** 1.0  
-**Última actualización:** Noviembre 2025
