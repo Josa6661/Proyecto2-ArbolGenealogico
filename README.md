@@ -44,7 +44,7 @@ Proyecto académico del curso **CE1103 - Algoritmos y Estructuras de Datos I** q
 ### Ejecutar el proyecto
 ```bash
 # Clonar el repositorio
-git clone https://github.com/[tu-usuario]/Proyecto2-ArbolGenealogico.git
+git clone https://github.com/[Josa6661]/Proyecto2-ArbolGenealogico.git
 
 # Navegar al directorio
 cd Proyecto2-ArbolGenealogico
