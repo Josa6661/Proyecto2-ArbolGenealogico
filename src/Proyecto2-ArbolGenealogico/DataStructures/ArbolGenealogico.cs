@@ -23,7 +23,15 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
 
         public NodoFamiliar BuscarPorNombre(string nombre)
         {
-            return BuscarPorNombreRecursivo(Raiz, nombre);
+            // Buscar en TODOS los nodos del árbol (incluyendo ancestros)
+            var todosLosNodos = ObtenerTodos();
+            for (int i = 0; i < todosLosNodos.Largo(); i++)
+            {
+                var nodo = todosLosNodos.Obtener(i);
+                if (string.Equals(nodo.Nombre, nombre, System.StringComparison.OrdinalIgnoreCase))
+                    return nodo;
+            }
+            return null;
         }
 
         private NodoFamiliar BuscarPorNombreRecursivo(NodoFamiliar actual, string nombre)
@@ -104,8 +112,73 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
         public ListaEnlazada<NodoFamiliar> ObtenerTodos()
         {
             var lista = new ListaEnlazada<NodoFamiliar>();
-            ObtenerTodosRecursivo(Raiz, lista);
+            var visitados = new ListaEnlazada<NodoFamiliar>();
+            
+            if (Raiz == null)
+                return lista;
+            
+            // Primero, ir hacia arriba para encontrar las raíces reales (nodos sin padres)
+            var raicesReales = new ListaEnlazada<NodoFamiliar>();
+            EncontrarRaicesReales(Raiz, raicesReales, visitados);
+            
+            // Luego recorrer desde cada raíz real
+            for (int i = 0; i < raicesReales.Largo(); i++)
+            {
+                ObtenerTodosDesdeNodo(raicesReales.Obtener(i), lista);
+            }
+            
             return lista;
+        }
+        
+        // Encuentra todas las raíces reales (nodos sin padres) subiendo desde la raíz actual
+        private void EncontrarRaicesReales(NodoFamiliar nodo, ListaEnlazada<NodoFamiliar> raices, ListaEnlazada<NodoFamiliar> visitados)
+        {
+            if (nodo == null || visitados.Contiene(nodo))
+                return;
+                
+            visitados.AgregarFinal(nodo);
+            
+            // Si no tiene padres, es una raíz real
+            if (nodo.Padres.Largo() == 0)
+            {
+                if (!raices.Contiene(nodo))
+                    raices.AgregarFinal(nodo);
+            }
+            else
+            {
+                // Subir a los padres
+                for (int i = 0; i < nodo.Padres.Largo(); i++)
+                {
+                    EncontrarRaicesReales(nodo.Padres.Obtener(i), raices, visitados);
+                }
+            }
+            
+            // También revisar el cónyuge
+            if (nodo.Conyuge != null)
+            {
+                EncontrarRaicesReales(nodo.Conyuge, raices, visitados);
+            }
+        }
+        
+        // Obtiene todos los nodos desde un nodo específico (descendientes y cónyuge)
+        private void ObtenerTodosDesdeNodo(NodoFamiliar nodo, ListaEnlazada<NodoFamiliar> lista)
+        {
+            if (nodo == null || lista.Contiene(nodo))
+                return;
+                
+            lista.AgregarFinal(nodo);
+            
+            // Agregar cónyuge
+            if (nodo.Conyuge != null && !lista.Contiene(nodo.Conyuge))
+            {
+                lista.AgregarFinal(nodo.Conyuge);
+            }
+            
+            // Recorrer hijos
+            for (int i = 0; i < nodo.Hijos.Largo(); i++)
+            {
+                ObtenerTodosDesdeNodo(nodo.Hijos.Obtener(i), lista);
+            }
         }
 
         // Obtiene solo los nodos en la jerarquía del árbol (sin cónyuges)
@@ -219,6 +292,88 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             return resultado;
         }
 
+        // Agregar padre/madre a un miembro existente
+        public bool AgregarPadreAMiembro(string nombreMiembro, NodoFamiliar nuevoPadre)
+        {
+            var miembro = BuscarPorNombre(nombreMiembro);
+            if (miembro == null)
+                return false;
+
+            // Validar que no tenga ya 2 padres
+            if (miembro.Padres.Largo() >= 2)
+                return false;
+
+            // Agregar el nuevo padre al miembro
+            if (!miembro.AgregarPadre(nuevoPadre))
+                return false;
+
+            // Agregar el miembro como hijo del nuevo padre
+            nuevoPadre.AgregarHijo(miembro);
+
+            return true;
+        }
+
+        // Agregar ambos padres (madre y padre) a un miembro existente
+        public bool AgregarPadresAMiembro(string nombreMiembro, NodoFamiliar padre, NodoFamiliar madre)
+        {
+            var miembro = BuscarPorNombre(nombreMiembro);
+            if (miembro == null)
+                return false;
+
+            // Validar que no tenga ya padres
+            if (miembro.Padres.Largo() > 0)
+                return false;
+
+            // Establecer a padre y madre como cónyuges
+            padre.EstablecerConyuge(madre);
+
+            // Agregar ambos padres al miembro
+            miembro.AgregarPadre(padre);
+            miembro.AgregarPadre(madre);
+
+            // Agregar el miembro como hijo de ambos padres
+            padre.AgregarHijo(miembro);
+            madre.AgregarHijo(miembro);
+
+            return true;
+        }
+
+        // Obtener todos los nodos que son raíces (no tienen padres)
+        public ListaEnlazada<NodoFamiliar> ObtenerNodosRaiz()
+        {
+            var raices = new ListaEnlazada<NodoFamiliar>();
+            var todosNodos = ObtenerTodos();
+
+            for (int i = 0; i < todosNodos.Largo(); i++)
+            {
+                var nodo = todosNodos.Obtener(i);
+                if (nodo.Padres.Largo() == 0)
+                {
+                    raices.AgregarFinal(nodo);
+                }
+            }
+
+            return raices;
+        }
+
+        // Actualiza la raíz del árbol para que apunte al ancestro más antiguo
+        // Esto es necesario después de agregar nodos para asegurar que el árbol se dibuje correctamente
+        public void ActualizarRaiz()
+        {
+            if (Raiz == null)
+                return;
+
+            // Encontrar todas las raíces reales (nodos sin padres)
+            var visitados = new ListaEnlazada<NodoFamiliar>();
+            var raicesReales = new ListaEnlazada<NodoFamiliar>();
+            EncontrarRaicesReales(Raiz, raicesReales, visitados);
+
+            // Si encontramos raíces reales, usar la primera como la raíz principal del árbol
+            if (raicesReales.Largo() > 0)
+            {
+                Raiz = raicesReales.Obtener(0);
+            }
+        }
 
     }
 }

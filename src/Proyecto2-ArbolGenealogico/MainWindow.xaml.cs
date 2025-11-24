@@ -1,4 +1,4 @@
-﻿using Proyecto2_ArbolGenealogico.DataStructures;
+using Proyecto2_ArbolGenealogico.DataStructures;
 using Proyecto2_ArbolGenealogico.BusinessLogic;
 using Proyecto2_ArbolGenealogico.Helpers;
 using Proyecto2_ArbolGenealogico.Services;
@@ -27,11 +27,15 @@ namespace Proyecto2_ArbolGenealogico
             
             lblPadre.Visibility = Visibility.Collapsed; // Ocultar inicialmente
             cmbPadre.Visibility = Visibility.Collapsed;
-            chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
             lblConyuge.Visibility = Visibility.Collapsed;
             cmbConyuge.Visibility = Visibility.Collapsed;
             lblHermano.Visibility = Visibility.Collapsed;
             cmbHermano.Visibility = Visibility.Collapsed;
+            
+            // Ocultar sección de agregar padres a miembro existente
+            lblMiembroParaPadres.Visibility = Visibility.Collapsed;
+            cmbMiembroParaPadres.Visibility = Visibility.Collapsed;
+            btnAgregarPadresAMiembro.Visibility = Visibility.Collapsed;
 
 
             // Ocultar sección de eliminar hasta que se cree el primer miembro
@@ -85,11 +89,11 @@ namespace Proyecto2_ArbolGenealogico
             
             if (sistema.Arbol.TieneRaiz())
             {
-                // Solo obtener nodos jerárquicos (sin cónyuges) para la lista de padres
-                var nodosJerarquicos = sistema.Arbol.ObtenerNodosJerarquicos();
-                for (int i = 0; i < nodosJerarquicos.Largo(); i++)
+                // Obtener TODOS los nodos (incluyendo cónyuges y padres añadidos) para la lista de padres
+                var todosNodos = sistema.Arbol.ObtenerTodos();
+                for (int i = 0; i < todosNodos.Largo(); i++)
                 {
-                    var miembro = nodosJerarquicos.Obtener(i);
+                    var miembro = todosNodos.Obtener(i);
                     // Agregar el nombre completo
                     cmbPadre.Items.Add(miembro.Nombre);
                 }
@@ -97,11 +101,15 @@ namespace Proyecto2_ArbolGenealogico
                 // Mostrar los controles solo cuando hay una raíz
                 lblPadre.Visibility = Visibility.Visible;
                 cmbPadre.Visibility = Visibility.Visible;
-                chkEsPadreDeRaiz.Visibility = Visibility.Visible;
                 lblConyuge.Visibility = Visibility.Visible;
                 cmbConyuge.Visibility = Visibility.Visible;
                 lblHermano.Visibility = Visibility.Visible;
                 cmbHermano.Visibility = Visibility.Visible;
+
+                // Mostrar sección de agregar padres a miembro existente
+                lblMiembroParaPadres.Visibility = Visibility.Visible;
+                cmbMiembroParaPadres.Visibility = Visibility.Visible;
+                btnAgregarPadresAMiembro.Visibility = Visibility.Visible;
 
                 // Mostrar también la sección de eliminar
                 lblEliminar.Visibility = Visibility.Visible;
@@ -113,11 +121,15 @@ namespace Proyecto2_ArbolGenealogico
                 // Ocultar los controles si no hay raíz
                 lblPadre.Visibility = Visibility.Collapsed;
                 cmbPadre.Visibility = Visibility.Collapsed;
-                chkEsPadreDeRaiz.Visibility = Visibility.Collapsed;
                 lblConyuge.Visibility = Visibility.Collapsed;
                 cmbConyuge.Visibility = Visibility.Collapsed;
                 lblHermano.Visibility = Visibility.Collapsed;
                 cmbHermano.Visibility = Visibility.Collapsed;
+                
+                // Ocultar sección de agregar padres a miembro existente
+                lblMiembroParaPadres.Visibility = Visibility.Collapsed;
+                cmbMiembroParaPadres.Visibility = Visibility.Collapsed;
+                btnAgregarPadresAMiembro.Visibility = Visibility.Collapsed;
 
                 // Ocultar también la sección de eliminar
                 lblEliminar.Visibility = Visibility.Collapsed;
@@ -138,7 +150,45 @@ namespace Proyecto2_ArbolGenealogico
             
             ActualizarListaConyuges();
             ActualizarListaHermanos();
+            ActualizarListaMiembrosParaPadres();
             ActualizarListaEliminar();
+        }
+
+        // Actualiza la lista de miembros disponibles para agregarles padres
+        private void ActualizarListaMiembrosParaPadres()
+        {
+            cmbMiembroParaPadres.Items.Clear();
+
+            if (sistema.Arbol.TieneRaiz())
+            {
+                var todosLosMiembros = sistema.Arbol.ObtenerTodos();
+                for (int i = 0; i < todosLosMiembros.Largo(); i++)
+                {
+                    var miembro = todosLosMiembros.Obtener(i);
+                    // Agregar todos los miembros que no tengan ya 2 padres
+                    if (miembro.Padres.Largo() < 2)
+                    {
+                        string info = $"{miembro.Nombre}";
+                        if (miembro.Padres.Largo() == 1)
+                            info += $" (ya tiene 1 padre: {miembro.Padres.Obtener(0).Nombre})";
+                        
+                        cmbMiembroParaPadres.Items.Add(info);
+                    }
+                }
+            }
+
+            // Mensaje informativo si no hay miembros disponibles
+            if (cmbMiembroParaPadres.Items.Count == 0)
+            {
+                cmbMiembroParaPadres.Items.Add("(Todos los miembros tienen 2 padres)");
+                cmbMiembroParaPadres.IsEnabled = false;
+                btnAgregarPadresAMiembro.IsEnabled = false;
+            }
+            else
+            {
+                cmbMiembroParaPadres.IsEnabled = true;
+                btnAgregarPadresAMiembro.IsEnabled = true;
+            }
         }
         
         // Actualiza la lista de miembros disponibles para agregar cónyuge
@@ -179,7 +229,8 @@ namespace Proyecto2_ArbolGenealogico
 
             if (sistema.Arbol.TieneRaiz())
             {
-                var todosLosMiembros = sistema.Arbol.ObtenerNodosJerarquicos();
+                // Obtener TODOS los miembros (incluyendo cónyuges) para poder agregar hermanos a cualquiera
+                var todosLosMiembros = sistema.Arbol.ObtenerTodos();
                 for (int i = 0; i < todosLosMiembros.Largo(); i++)
                 {
                     var miembro = todosLosMiembros.Obtener(i);
@@ -216,7 +267,6 @@ namespace Proyecto2_ArbolGenealogico
                     cmbPadre.Text = "";
                     cmbConyuge.SelectedIndex = -1;
                     cmbConyuge.Text = "";
-                    chkEsPadreDeRaiz.IsChecked = false;
                 }
             }
         }
@@ -248,28 +298,6 @@ namespace Proyecto2_ArbolGenealogico
             }
         }
 
-        // Manejar cuando se marca el checkbox de "padre de raíz"
-        private void ChkEsPadreDeRaiz_Checked(object sender, RoutedEventArgs e)
-        {
-            // Deshabilitar el ComboBox de padre cuando se marca esta opción
-            cmbPadre.IsEnabled = false;
-            cmbPadre.SelectedIndex = -1;
-            cmbPadre.Text = "";
-            // Limpiar el ComboBox de cónyuge
-            cmbConyuge.SelectedIndex = -1;
-            cmbConyuge.Text = "";
-        }
-
-        // Manejar cuando se desmarca el checkbox de "padre de raíz"
-        private void ChkEsPadreDeRaiz_Unchecked(object sender, RoutedEventArgs e)
-        {
-            // Habilitar el ComboBox de padre nuevamente
-            if (sistema.Arbol.TieneRaiz())
-            {
-                cmbPadre.IsEnabled = true;
-            }
-        }
-
         // Manejar cuando se selecciona un padre
         private void CmbPadre_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -298,7 +326,6 @@ namespace Proyecto2_ArbolGenealogico
                 {
                     cmbPadre.SelectedIndex = -1;
                     cmbPadre.Text = "";
-                    chkEsPadreDeRaiz.IsChecked = false;
                     cmbHermano.SelectedIndex = -1;
                     cmbHermano.Text = "";
                 }
@@ -379,8 +406,7 @@ namespace Proyecto2_ArbolGenealogico
                 return;
             }
 
-            // Validar si se está agregando un padre a la raíz o un cónyuge
-            bool esPadreDeRaiz = chkEsPadreDeRaiz.IsChecked == true;
+            // Validar si se está agregando un cónyuge
             string conyugeNombre = cmbConyuge.Text.Trim();
             bool esConyuge = !string.IsNullOrWhiteSpace(conyugeNombre) && conyugeNombre != "(Sin miembros disponibles)";
 
@@ -419,49 +445,8 @@ namespace Proyecto2_ArbolGenealogico
                         return;
                 }
             }
-            // Si es padre de raíz, validar con el nodo raíz actual
-            else if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
-            {
-                var raizActual = sistema.Arbol.Raiz;
-
-                // Validar que el nuevo padre sea mayor que la raíz actual
-                if (raizActual.Edad >= edad)
-                {
-                    MessageBox.Show($"El padre debe ser mayor que la raíz actual del árbol.\n" +
-                        $"Edad de la raíz actual '{raizActual.Nombre}': {raizActual.Edad} años\n" +
-                        $"Edad del nuevo padre: {edad} años",
-                        "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Validar fechas de nacimiento
-                if (!string.IsNullOrEmpty(raizActual.FechaNacimiento) &&
-                    DateTime.TryParseExact(raizActual.FechaNacimiento, "dd/MM/yyyy",
-                        System.Globalization.CultureInfo.InvariantCulture,
-                        System.Globalization.DateTimeStyles.None, out DateTime fechaNacRaiz))
-                {
-                    if (fechaNac >= fechaNacRaiz)
-                    {
-                        MessageBox.Show($"El padre debe nacer antes que la raíz actual.\n" +
-                            $"Fecha de nacimiento de la raíz: {raizActual.FechaNacimiento}\n" +
-                            $"Fecha de nacimiento del padre: {fechaNacimiento}",
-                            "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
-                    // Validar que el padre tenga al menos 10 años cuando nace la raíz
-                    int añosDiferencia = fechaNacRaiz.Year - fechaNac.Year;
-                    if (añosDiferencia < 10)
-                    {
-                        MessageBox.Show($"El padre debe tener al menos 10 años cuando nace su hijo.\n" +
-                            $"Diferencia de edad: {añosDiferencia} años",
-                            "Diferencia de Edad Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-                }
-            }
-            // Validar relación padre-hijo (si hay padre especificado y NO es padre de raíz)
-            else if (!esPadreDeRaiz && !string.IsNullOrWhiteSpace(padreNombre) && padreNombre != "(Sin familiares en el árbol)")
+            // Validar relación padre-hijo (si hay padre especificado)
+            if (!string.IsNullOrWhiteSpace(padreNombre) && padreNombre != "(Sin familiares en el árbol)")
             {
                 var padre = sistema.Arbol.BuscarPorNombre(padreNombre);
                 if (padre != null)
@@ -620,6 +605,11 @@ namespace Proyecto2_ArbolGenealogico
                 exito = sistema.Arbol.AgregarConyuge(conyugeNombre, nuevo);
                 if (exito)
                 {
+                    // Agregar al grafo también
+                    var nodoGrafo = new GrafoGeografico.NodoGrafo(nuevo.Cedula, nuevo.Nombre, nuevo.Latitud, nuevo.Longitud, nuevo.FotoRuta);
+                    sistema.Grafo.AgregarNodo(nodoGrafo);
+                    sistema.Grafo.RecalcularTodasDistancias();
+                    
                     MessageBox.Show($"'{nombre}' ha sido agregado como cónyuge de '{conyugeNombre}'.", "Éxito",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -636,23 +626,27 @@ namespace Proyecto2_ArbolGenealogico
                 var hermano = sistema.Arbol.BuscarPorNombre(hermanoNombre);
                 if (hermano != null && hermano.Padres.Largo() > 0)
                 {
-                    // Agregar como hijo del primer padre
-                    string nombrePadreComun = hermano.Padres.Obtener(0).Nombre;
-                    exito = sistema.AgregarMiembroCompleto(nombrePadreComun, nuevo);
-
-                    // Si el hermano tiene 2 padres, agregar el segundo también
-                    if (hermano.Padres.Largo() == 2 && exito)
-                    {
-                        var segundoPadre = hermano.Padres.Obtener(1);
-                        nuevo.AgregarPadre(segundoPadre);
-                        segundoPadre.Hijos.AgregarFinal(nuevo);
-                    }
-
+                    // Obtener el primer padre para usar el flujo estándar
+                    var primerPadre = hermano.Padres.Obtener(0);
+                    string nombrePadreComun = primerPadre.Nombre;
+                    
+                    // Usar el flujo estándar de agregar hijo (igual que "Seleccionar padre")
+                    exito = sistema.AgregarMiembroCompleto(primerPadre.Nombre, nuevo);
+                    
                     if (exito)
                     {
+                        // Si el hermano tiene 2 padres, agregar el segundo también
+                        if (hermano.Padres.Largo() == 2)
+                        {
+                            var segundoPadre = hermano.Padres.Obtener(1);
+                            nuevo.AgregarPadre(segundoPadre);
+                            segundoPadre.AgregarHijo(nuevo);
+                            nombrePadreComun = $"{primerPadre.Nombre} y {segundoPadre.Nombre}";
+                        }
+                        
                         MessageBox.Show(
                             $"'{nombre}' ha sido agregado como hermano/hermana de '{hermanoNombre}'.\n" +
-                            $"Ambos son hijos de '{nombrePadreComun}'.",
+                            $"Ambos son hijos de {nombrePadreComun}.",
                             "Éxito",
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
@@ -660,8 +654,7 @@ namespace Proyecto2_ArbolGenealogico
                     else
                     {
                         MessageBox.Show(
-                            $"No se pudo agregar como hermano de '{hermanoNombre}'.\n" +
-                            $"Verifica que el padre '{nombrePadreComun}' exista.",
+                            $"No se pudo agregar como hermano de '{hermanoNombre}'.",
                             "Error",
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
@@ -679,17 +672,7 @@ namespace Proyecto2_ArbolGenealogico
                 }
             }
 
-            // Caso 2: Agregar un padre a la raíz actual
-            else if (esPadreDeRaiz && sistema.Arbol.TieneRaiz())
-            {
-                string nombreRaizAnterior = sistema.Arbol.Raiz.Nombre;
-                sistema.Arbol.AgregarPadreARaiz(nuevo);
-                exito = true;
-                MessageBox.Show($"'{nombre}' ha sido agregado como padre de '{nombreRaizAnterior}' (antigua raíz).\n" +
-                    $"'{nombre}' es ahora la nueva raíz del árbol.", "Éxito",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            // Caso 3: Crear la primera raíz del árbol
+            // Caso 2: Crear la primera raíz del árbol
             else if (!sistema.Arbol.TieneRaiz())
             {
                 exito = sistema.AgregarMiembroCompleto("", nuevo);
@@ -706,12 +689,70 @@ namespace Proyecto2_ArbolGenealogico
                     return;
                 }
 
-                exito = sistema.AgregarMiembroCompleto(padreNombre, nuevo);
+                // Buscar el padre ANTES de agregar para manejar cónyuges correctamente
+                var padreEncontrado = sistema.Arbol.BuscarPorNombre(padreNombre);
+                if (padreEncontrado == null)
+                {
+                    MessageBox.Show($"No se encontró el padre '{padreNombre}'. Verifica el nombre e intenta nuevamente.",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Si el padre tiene cónyuge, determinar cuál está en la jerarquía principal
+                NodoFamiliar padreJerarquico = padreEncontrado;
+                NodoFamiliar padreConyugal = null;
+                
+                if (padreEncontrado.Conyuge != null)
+                {
+                    // Obtener los nodos jerárquicos
+                    var nodosJerarquicos = sistema.Arbol.ObtenerNodosJerarquicos();
+                    bool padreEnJerarquia = false;
+                    
+                    // Verificar si el padre seleccionado está en la jerarquía
+                    for (int i = 0; i < nodosJerarquicos.Largo(); i++)
+                    {
+                        if (nodosJerarquicos.Obtener(i).Cedula == padreEncontrado.Cedula)
+                        {
+                            padreEnJerarquia = true;
+                            break;
+                        }
+                    }
+                    
+                    // Si el padre seleccionado NO está en la jerarquía, usar su cónyuge (que sí debe estar)
+                    if (!padreEnJerarquia)
+                    {
+                        padreConyugal = padreEncontrado;  // El seleccionado será el segundo padre
+                        padreJerarquico = padreEncontrado.Conyuge;  // El cónyuge es el jerárquico
+                    }
+                    else
+                    {
+                        padreConyugal = padreEncontrado.Conyuge;  // El cónyuge será el segundo padre
+                    }
+                }
+                
+                // Agregar al padre jerárquico
+                exito = sistema.AgregarMiembroCompleto(padreJerarquico.Nombre, nuevo);
 
                 if (exito)
                 {
-                    MessageBox.Show($"'{nombre}' ha sido agregado como hijo de '{padreNombre}'.", "Éxito",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Mostrar el mensaje con el nombre que el usuario seleccionó primero
+                    string mensajeHijo = $"'{nombre}' ha sido agregado como hijo de '{padreNombre}'";
+                    
+                    // Si hay cónyuge, agregar como segundo padre
+                    if (padreConyugal != null)
+                    {
+                        string nombreOtroPadre = padreConyugal.Nombre;
+                        mensajeHijo = $"'{nombre}' ha sido agregado como hijo de '{padreNombre}' y '{nombreOtroPadre}'";
+                        
+                        if (nuevo.Padres.Largo() < 2)
+                        {
+                            nuevo.AgregarPadre(padreConyugal);
+                            padreConyugal.AgregarHijo(nuevo);
+                        }
+                    }
+                    mensajeHijo += ".";
+                    
+                    MessageBox.Show(mensajeHijo, "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
@@ -723,8 +764,8 @@ namespace Proyecto2_ArbolGenealogico
 
             if (exito)
             {
-                chkEsPadreDeRaiz.IsChecked = false; // Desmarcar el checkbox
                 ActualizarListaPadres(); // Actualizar listas de padres y cónyuges disponibles
+                ActualizarListaConyuges(); // Actualizar lista de cónyuges para remover los que ya tienen pareja
                 arbolView.DibujarArbol(sistema.Arbol);
                 ActualizarMapa(); // Actualizar mapa con nuevos marcadores
                 ActualizarEstadisticas_Click(null, null);
@@ -761,6 +802,21 @@ namespace Proyecto2_ArbolGenealogico
             if (openFileDialog.ShowDialog() == true)
             {
                 txtFotoRuta.Text = openFileDialog.FileName;
+            }
+        }
+
+        // Método auxiliar para recopilar un nodo y todos sus descendientes
+        private void RecopilarNodoYDescendientes(NodoFamiliar nodo, ListaEnlazada<NodoFamiliar> lista)
+        {
+            if (nodo == null || lista.Contiene(nodo))
+                return;
+                
+            lista.AgregarFinal(nodo);
+            
+            // Recopilar todos los hijos recursivamente
+            for (int i = 0; i < nodo.Hijos.Largo(); i++)
+            {
+                RecopilarNodoYDescendientes(nodo.Hijos.Obtener(i), lista);
             }
         }
 
@@ -825,6 +881,25 @@ namespace Proyecto2_ArbolGenealogico
             else
             {
                 // Es un nodo en la jerarquía
+                // Recopilar todos los nodos a eliminar (el nodo y sus descendientes)
+                var nodosAEliminar = new ListaEnlazada<NodoFamiliar>();
+                RecopilarNodoYDescendientes(miembro, nodosAEliminar);
+                
+                // Eliminar referencias de padres en el nodo a eliminar
+                for (int i = 0; i < miembro.Padres.Largo(); i++)
+                {
+                    var padre = miembro.Padres.Obtener(i);
+                    // Buscar y eliminar este nodo de la lista de hijos del padre
+                    for (int j = 0; j < padre.Hijos.Largo(); j++)
+                    {
+                        if (padre.Hijos.Obtener(j).Cedula == miembro.Cedula)
+                        {
+                            padre.Hijos.EliminarPorIndice(j);
+                            break;
+                        }
+                    }
+                }
+                
                 // Si el miembro tiene cónyuge, eliminar la relación bidireccional
                 if (miembro.Conyuge != null)
                 {
@@ -833,18 +908,30 @@ namespace Proyecto2_ArbolGenealogico
 
                 // Eliminar el miembro del árbol
                 exito = sistema.Arbol.EliminarMiembro(nombreEliminar);
+                
+                // Eliminar todos los nodos del grafo
+                if (exito)
+                {
+                    for (int i = 0; i < nodosAEliminar.Largo(); i++)
+                    {
+                        var nodo = nodosAEliminar.Obtener(i);
+                        sistema.Grafo.EliminarNodo(nodo.Cedula);
+                    }
+                    sistema.Grafo.RecalcularTodasDistancias();
+                }
             }
 
             if (exito)
             {
                 string mensaje = esConyuge 
                     ? $"'{nombreEliminar}' (cónyuge) ha sido eliminado." 
-                    : $"'{nombreEliminar}' ha sido eliminado del árbol.";
+                    : $"'{nombreEliminar}' y sus descendientes han sido eliminados del árbol.";
                     
                 MessageBox.Show(mensaje, "Éxito", 
                     MessageBoxButton.OK, MessageBoxImage.Information);
                 
                 ActualizarListaPadres();
+                ActualizarListaConyuges();
                 arbolView.DibujarArbol(sistema.Arbol);
                 ActualizarMapa(); // Actualizar mapa después de eliminar
                 ActualizarEstadisticas_Click(null, null);
@@ -884,25 +971,6 @@ namespace Proyecto2_ArbolGenealogico
             {
                 MessageBox.Show($"No se encontró el miembro '{nombreEliminar}'.", 
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Verificar que esté en la jerarquía
-            var nodosJerarquicos = sistema.Arbol.ObtenerNodosJerarquicos();
-            bool estaEnJerarquia = false;
-            for (int i = 0; i < nodosJerarquicos.Largo(); i++)
-            {
-                if (nodosJerarquicos.Obtener(i).Cedula == miembro.Cedula)
-                {
-                    estaEnJerarquia = true;
-                    break;
-                }
-            }
-
-            if (!estaEnJerarquia)
-            {
-                MessageBox.Show("Solo se pueden marcar como desconocidos los nodos de la jerarquía principal.", 
-                    "Acción no Permitida", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -967,6 +1035,183 @@ namespace Proyecto2_ArbolGenealogico
             cmbConyuge.Text = "";
             cmbHermano.SelectedIndex = -1;
             cmbHermano.Text = "";
+        }
+
+        // Botón para agregar padres a un miembro existente
+        private void AgregarPadresAMiembro_Click(object sender, RoutedEventArgs e)
+        {
+            // Validar campos obligatorios del nuevo padre/madre
+            string nombre = txtNombre.Text.Trim();
+            string cedula = txtCedula.Text.Trim();
+            string fechaNacimiento = txtFechaNacimiento.Text.Trim();
+            string edadTexto = txtEdad.Text.Trim();
+            string latitudTexto = txtLatitud.Text.Trim();
+            string longitudTexto = txtLongitud.Text.Trim();
+            string fotoRuta = txtFotoRuta.Text.Trim();
+
+            // Validar que se haya seleccionado un miembro
+            string miembroSeleccionado = cmbMiembroParaPadres.Text.Trim();
+            if (string.IsNullOrWhiteSpace(miembroSeleccionado) || miembroSeleccionado.StartsWith("("))
+            {
+                MessageBox.Show("Por favor, selecciona un miembro al que agregarle padres.",
+                    "Selección Requerida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Extraer el nombre del miembro (antes del paréntesis si lo tiene)
+            string nombreMiembro = miembroSeleccionado.Split('(')[0].Trim();
+
+            // Validaciones usando ValidacionHelper
+            if (!ValidacionHelper.ValidarCamposRequeridos(nombre, cedula, fechaNacimiento, edadTexto, latitudTexto, longitudTexto, out string mensajeCampos))
+            {
+                MessageBox.Show(mensajeCampos, "Campo Requerido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!ValidacionHelper.ValidarCedula(cedula, out string mensajeCedula))
+            {
+                MessageBox.Show(mensajeCedula, "Cédula Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (sistema.Arbol.BuscarPorCedula(cedula) != null)
+            {
+                MessageBox.Show($"Ya existe un familiar con la cédula '{cedula}'.\nCada miembro debe tener una cédula única.",
+                    "Cédula Duplicada", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!ValidacionHelper.ValidarFecha(fechaNacimiento, out DateTime fechaNac))
+            {
+                MessageBox.Show("Por favor, ingresa la fecha de nacimiento en formato dd/MM/yyyy (ejemplo: 15/03/1990).",
+                    "Fecha Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (fechaNac > DateTime.Now)
+            {
+                MessageBox.Show("La fecha de nacimiento no puede ser en el futuro.", "Fecha Inválida",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(edadTexto, out int edad) || edad < 0 || edad > 150)
+            {
+                MessageBox.Show("Por favor, ingresa una edad válida (0-150).", "Edad Inválida",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!ValidacionHelper.ValidarEdad(fechaNac, edad, out _))
+            {
+                int edadCalculada = DateTime.Now.Year - fechaNac.Year;
+                if (fechaNac.Date > DateTime.Now.AddYears(-edadCalculada))
+                    edadCalculada--;
+
+                MessageBox.Show($"La edad ingresada ({edad}) no coincide con la fecha de nacimiento ({fechaNacimiento}).\n" +
+                    $"La edad correcta basada en tu fecha de nacimiento es {edadCalculada} años.",
+                    "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!ValidacionHelper.ValidarCoordenadas(latitudTexto, longitudTexto, out double latitud, out double longitud, out string mensajeCoordenadas))
+            {
+                MessageBox.Show(mensajeCoordenadas, "Coordenada Inválida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Buscar el miembro al que se le agregarán padres
+            var miembro = sistema.Arbol.BuscarPorNombre(nombreMiembro);
+            if (miembro == null)
+            {
+                MessageBox.Show($"No se encontró el miembro '{nombreMiembro}'.",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Validar que el padre sea mayor que el hijo
+            if (miembro.Edad >= edad)
+            {
+                MessageBox.Show($"El padre/madre debe ser mayor que el hijo.\n" +
+                    $"Edad del hijo '{miembro.Nombre}': {miembro.Edad} años\n" +
+                    $"Edad del padre/madre: {edad} años",
+                    "Edad Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validar fechas de nacimiento
+            if (!string.IsNullOrEmpty(miembro.FechaNacimiento) &&
+                DateTime.TryParseExact(miembro.FechaNacimiento, "dd/MM/yyyy",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out DateTime fechaNacHijo))
+            {
+                if (fechaNac >= fechaNacHijo)
+                {
+                    MessageBox.Show($"El padre/madre debe nacer antes que el hijo.\n" +
+                        $"Fecha de nacimiento del hijo: {miembro.FechaNacimiento}\n" +
+                        $"Fecha de nacimiento del padre/madre: {fechaNacimiento}",
+                        "Fecha Inconsistente", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validar diferencia de edad mínima
+                if (!ValidacionHelper.ValidarDiferenciaEdadPadreHijo(fechaNac, fechaNacHijo, out string mensajeDiferencia))
+                {
+                    MessageBox.Show(mensajeDiferencia, "Diferencia de Edad Inválida",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
+            // Crear el nuevo padre/madre
+            NodoFamiliar nuevoPadre = new NodoFamiliar(nombre, cedula, fechaNacimiento, edad, fotoRuta, latitud, longitud);
+
+            // Agregar el padre
+            bool exito = sistema.Arbol.AgregarPadreAMiembro(nombreMiembro, nuevoPadre);
+            
+            string mensaje = "";
+            if (exito)
+            {
+                // Agregar al grafo
+                var nodoGrafo = new GrafoGeografico.NodoGrafo(nuevoPadre.Cedula, nuevoPadre.Nombre, nuevoPadre.Latitud, nuevoPadre.Longitud, nuevoPadre.FotoRuta);
+                sistema.Grafo.AgregarNodo(nodoGrafo);
+                sistema.Grafo.RecalcularTodasDistancias();
+                
+                mensaje = $"'{nuevoPadre.Nombre}' ha sido agregado como padre/madre de '{nombreMiembro}'.";
+                
+                if (miembro.Padres.Largo() == 2)
+                {
+                    var otroPadre = miembro.Padres.Obtener(0).Nombre == nuevoPadre.Nombre 
+                        ? miembro.Padres.Obtener(1).Nombre 
+                        : miembro.Padres.Obtener(0).Nombre;
+                    mensaje += $"\n\n'{nombreMiembro}' ahora tiene 2 padres: {nuevoPadre.Nombre} y {otroPadre}.";
+                }
+                else if (miembro.Padres.Largo() == 1)
+                {
+                    mensaje += $"\n\nPuedes agregar el segundo padre repitiendo este proceso.";
+                }
+            }
+
+            if (exito)
+            {
+                MessageBox.Show(mensaje, "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                ActualizarListaPadres();
+                ActualizarListaConyuges(); // Actualizar para remover los que ya tienen pareja
+                ActualizarListaMiembrosParaPadres();
+                arbolView.DibujarArbol(sistema.Arbol);
+                ActualizarMapa();
+                ActualizarEstadisticas_Click(null, null);
+                LimpiarCampos();
+                cmbMiembroParaPadres.SelectedIndex = -1;
+                cmbMiembroParaPadres.Text = "";
+            }
+            else
+            {
+                MessageBox.Show($"No se pudo agregar el padre/madre a '{nombreMiembro}'.\n" +
+                    "Verifica que el miembro no tenga ya 2 padres.",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

@@ -100,6 +100,30 @@ namespace Proyecto2_ArbolGenealogico.DataStructures
             }
         }
 
+        // Elimina un nodo del grafo
+        public bool EliminarNodo(string cedula)
+        {
+            for (int i = 0; i < nodos.Largo(); i++)
+            {
+                if (nodos.Obtener(i).Cedula == cedula)
+                {
+                    nodos.EliminarPorIndice(i);
+                    
+                    // Eliminar todas las distancias relacionadas con este nodo
+                    for (int j = distancias.Largo() - 1; j >= 0; j--)
+                    {
+                        var dist = distancias.Obtener(j);
+                        if (dist.Cedula1 == cedula || dist.Cedula2 == cedula)
+                        {
+                            distancias.EliminarPorIndice(j);
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Buscar nodo por cédula
         private NodoGrafo BuscarNodo(string cedula)
         {
